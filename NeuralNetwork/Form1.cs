@@ -35,6 +35,7 @@ namespace NeuralNetwork
         /// Main GUI variable
         /// </summary>
         private PictureBox pictureBoxOne;
+        private PictureBox pictureBoxTwo;
         private Panel panel;
         private CustomButton closeForm;
         private CustomButton minForm;
@@ -52,6 +53,11 @@ namespace NeuralNetwork
         private int width;
         private int height;
         private const int LETTER_SIDE = 28;
+        /// <summary>
+        /// Bitmaps
+        /// </summary>
+        private Bitmap[] data;
+        private byte[] labels;
 
         public Form1()
         {
@@ -106,6 +112,14 @@ namespace NeuralNetwork
             pictureBoxOne.BackColor = themeBackgroundColorTwo;
             pictureBoxOne.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxOne.MouseMove += new MouseEventHandler(this.pictureBoxOne_MouseMove);
+            // 
+            // pictureBoxTwo shown on the right
+            //
+            pictureBoxTwo = new PictureBox();
+            pictureBoxTwo.Name = "pictureBoxTwo";
+            pictureBoxTwo.TabStop = false;
+            pictureBoxTwo.BackColor = themeBackgroundColorTwo;
+            pictureBoxTwo.SizeMode = PictureBoxSizeMode.StretchImage;
             //
             // conext menu for pictureBoxOne
             //
@@ -124,6 +138,7 @@ namespace NeuralNetwork
             panel.Name = "panel1";
             panel.Size = new System.Drawing.Size(this.Width, this.Height - 25);
             panel.Controls.Add(pictureBoxOne);
+            panel.Controls.Add(pictureBoxTwo);
             // 
             // closeForm
             // 
@@ -221,6 +236,8 @@ namespace NeuralNetwork
                 maxForm.Location = new Point(w - MAX_FORM_HORZ_OFFSET, 0);
                 minForm.Location = new Point(w - MIN_FORM_HORZ_OFFSET, 0);
                 pictureBoxOne.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
+                pictureBoxTwo.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
+                pictureBoxTwo.Location = new Point(w / 2 + PICTUREBOX_OFFSET / 2, 27 + PICTUREBOX_OFFSET);
             }
         }
 
@@ -401,6 +418,36 @@ namespace NeuralNetwork
             menuStrip.ForeColor = themeColor;
             openToolStripMenuItem.ForeColor = themeColor;
             saveToolStripMenuItem.ForeColor = themeColor;
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.Title = "Open Data";
+                string path = "";
+                string secondPath = "";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    path = dialog.FileName;
+                }
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    secondPath = dialog.FileName;
+                }
+                if (path.Contains("labels") &&
+                    secondPath.Contains("images"))
+                {
+                    MnistLoader.LoadMnist(path, secondPath, out data, out labels);
+                    pictureBoxTwo.Image = data[0];
+                }
+                else if (secondPath.Contains("labels") &&
+                    path.Contains("images"))
+                {
+                    MnistLoader.LoadMnist(secondPath, path, out data, out labels);
+                    pictureBoxTwo.Image = data[0];
+                }
+            }
         }
     }
 }
