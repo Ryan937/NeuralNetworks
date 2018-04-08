@@ -34,6 +34,8 @@ namespace NeuralNetwork
             neurons = neuronsList.ToArray();
         }
 
+
+
         private void InitWeights()
         {
 
