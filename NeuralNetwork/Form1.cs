@@ -48,14 +48,17 @@ namespace NeuralNetwork
         /// </summary>
         private Graphics G;
         private Bitmap B;
+        private SolidBrush brush;
         private int width;
         private int height;
+        private const int LETTER_SIDE = 28;
 
         public Form1()
         {
             this.themeBackgroundColor = Color.FromArgb(175, 0, 0, 0);
             this.themeBackgroundColorTwo = Color.FromArgb(100, 0, 0, 0);
             this.themeColor = Color.FromArgb(200, 144, 238, 144);
+            this.brush = new SolidBrush(Color.Cyan);
             InitializeComponent();
             InitializeCustom();
             InitializeDrawing();
@@ -68,7 +71,7 @@ namespace NeuralNetwork
         /// </summary>
         private void InitializeDrawing()
         {
-            B = new Bitmap(1000 / 2 - PICTUREBOX_OFFSET * 3 / 2, 600 - 54 - PICTUREBOX_OFFSET * 2);
+            B = new Bitmap(28, 28);
             G = Graphics.FromImage(B);
         }
 
@@ -76,8 +79,9 @@ namespace NeuralNetwork
         {
             if (e.Button == MouseButtons.Left)
             {
-                Debug.WriteLine(e.X + " " + e.Y);
-                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(e.X, e.Y), new Size(1, 1)));
+                int cX = (int)((double)e.X / (double)pictureBoxOne.Width * LETTER_SIDE);
+                int cY = (int)((double)e.Y / (double)pictureBoxOne.Width * LETTER_SIDE);
+                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(cX, cY), new Size(1, 1)));
             }
             pictureBoxOne.Image = B;
         }
