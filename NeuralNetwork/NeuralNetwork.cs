@@ -24,8 +24,11 @@ namespace NeuralNetwork
         private float[][][] weights;
         private float[][] biases;
         private float[] cost;
+        private bool costExist = false;
+        private bool gradVectExist = false;
         gradientVector gradientVector;
         private T[] interpretation;
+        private float n = 3;
         /// <summary>
         /// A threshold for determining output validity
         /// </summary>
@@ -252,20 +255,79 @@ namespace NeuralNetwork
                     expectedOutput = 0.00f;
                 }
             }
-            cost[v] = (cost[v] + costTemp) / 2;
+
+            if (costExist == false)
+            {
+                costExist = true;
+                cost[v] = costTemp;
+
+            }
+            else if (costExist == true)
+            {
+                cost[v] = (cost[v] + costTemp) / 2;
+            }
         }
 
         private void calcGradientVector()
         {
             //neurons[L-1][] * derivativeSigmoid(neurons[L][]) * 2(cost[L])
-            for (int i = layers.Length; i <= 0; i--)
+            if (gradVectExist == true)
+            {
+                for (int i = layers.Length - 1; i > 0; i--)
+                {
+                    for (int j = 0; j < neurons[i].Length; j++)
+                    {
+                        gradientVector.weights[j] += (neurons[i - 1][j] *
+                            derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+
+                        gradientVector.biases[j] += (derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+                    }
+                }
+            }
+            else
+            {
+                gradVectExist = true;
+
+                for (int i = layers.Length - 1; i > 0; i--)
+                {
+                    for (int j = 0; j < neurons[i].Length; j++)
+                    {
+                        gradientVector.weights[j] += neurons[i - 1][j] *
+                            derivativeSigmoid(neurons[i][j]) * 2 * (cost[i]);
+
+                        gradientVector.biases[j] += derivativeSigmoid(neurons[i][j]) * 2 * (cost[i]);
+                    }
+                }
+            }
+            addGradVectToWeight();
+            addGradVectToBias();
+        }
+
+        private void addGradVectToWeight()
+        {
+            int index = 0;
+
+            for (int i = layers.Length - 1; i > 0; i--)
             {
                 for (int j = 0; j < neurons[i].Length; j++)
                 {
-                    gradientVector.weights[j] += (neurons[i - 1][j] *
-                        derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+                    for (int k = 0; k < weights[i][j].Length; k++)
+                    {
+                        weights[i][j][k] += -n * gradientVector.weights[index++];
+                    }
+                }
+            }
+        }
 
-                    gradientVector.biases[j] += (derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+        private void addGradVectToBias()
+        {
+            int index = 0;
+
+            for (int i = layers.Length - 1; i > 0; i--)
+            {
+                for (int j = 0; j < neurons[i].Length; j++)
+                {
+                    biases[i][j] += -n * gradientVector.biases[index++];
                 }
             }
         }
