@@ -398,5 +398,11 @@ namespace NeuralNetwork
             openToolStripMenuItem.ForeColor = themeColor;
             saveToolStripMenuItem.ForeColor = themeColor;
         }
+
+        private void weightsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int[] layers = new int[] {16, 12, 8, 4};
+            NeuralNetwork nw = new NeuralNetwork(layers);
+        }
     }
 }
