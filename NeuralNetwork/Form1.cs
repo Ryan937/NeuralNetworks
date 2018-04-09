@@ -58,6 +58,10 @@ namespace NeuralNetwork
         /// </summary>
         private Bitmap[] data;
         private byte[] labels;
+        /// <summary>
+        /// Neural networks
+        /// </summary>
+        private NeuralNetwork<byte> digitNw;
 
         public Form1()
         {
@@ -69,7 +73,6 @@ namespace NeuralNetwork
             InitializeCustom();
             InitializeDrawing();
             CustomizeMenuStrip(menuStrip1);
-            NeuralNetwork nw = new NeuralNetwork(new int[] {10, 16, 16, 10 });
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
 
@@ -287,7 +290,7 @@ namespace NeuralNetwork
                 m.Result = (IntPtr)(HT_CAPTION);
             }
         }
-        
+
         /// <summary>
         /// Custom tool strip renderer
         /// </summary>
@@ -419,6 +422,11 @@ namespace NeuralNetwork
             menuStrip.ForeColor = themeColor;
             openToolStripMenuItem.ForeColor = themeColor;
             saveToolStripMenuItem.ForeColor = themeColor;
+            aiToolStripMenuItem.ForeColor = themeColor;
+            newToolStripMenuItem.ForeColor = themeColor;
+            loadToolStripMenuItem.ForeColor = themeColor;
+            trainToolStripMenuItem.ForeColor = themeColor;
+            digitToolStripMenuItem.ForeColor = themeColor;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -449,6 +457,32 @@ namespace NeuralNetwork
                     pictureBoxTwo.Image = data[0];
                 }
             }
+        }
+
+        private void newDigitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int[] layers = new int[4] { 784, 16, 16, 10 };
+            DigitNN.init(out digitNw, layers);
+        }
+
+        /// <summary>
+        /// Train neural networks of digit type
+        /// </summary>
+        /// <param name="sender">sender object</param>
+        /// <param name="e">event</param>
+        private void trainDigitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (data != null && labels != null && digitNw != null)
+            {
+                float[][] trainData = DigitNN.transformBitmapdata(data);
+                int batchSize = 2;
+                Train<byte>.trainNetwork(digitNw, trainData, labels, batchSize);
+            }
+            else
+            {
+                // handle if data not yet loaded or neural network not yet initalized
+            }
+
         }
     }
 }

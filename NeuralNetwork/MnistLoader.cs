@@ -34,18 +34,18 @@ namespace NeuralNetwork
                 int numRows = BigEndianUtils.ReadBigInt32(brImages);
                 int numCols = BigEndianUtils.ReadBigInt32(brImages);
                 bitmap = new Bitmap[numImages];
-
+                
                 int magic2 = BigEndianUtils.ReadBigInt32(brLabels);
                 int numLabels = BigEndianUtils.ReadBigInt32(brLabels);
                 labels = new byte[numLabels];
 
                 // each test image
-                for (int di = 0; di < 2; ++di)
+                for (int di = 0; di < numImages; ++di)
                 {
                     bitmap[di] = new Bitmap(numRows, numCols);
-                    for (int i = 0; i < 28; ++i)
+                    for (int i = 0; i < DigitNN.IMAGE_SIDE; ++i)
                     {
-                        for (int j = 0; j < 28; ++j)
+                        for (int j = 0; j < DigitNN.IMAGE_SIDE; ++j)
                         {
                             byte b = brImages.ReadByte();
                             bitmap[di].SetPixel(j, i, Color.FromArgb(b, b, b));

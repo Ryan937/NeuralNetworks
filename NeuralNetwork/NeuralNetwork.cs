@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork
 {
-    class NeuralNetwork
+    class NeuralNetwork<T>
     {
         private int[] layers;
         /// <summary>
@@ -18,6 +18,11 @@ namespace NeuralNetwork
         private float[][][] weights;
         private float[][] biases;
         private float[] cost;
+        private T[] interpretation;
+        /// <summary>
+        /// A threshold for determining output validity
+        /// </summary>
+        private const float threshold = 0.8f;
 
         private Random random;
 
@@ -25,7 +30,7 @@ namespace NeuralNetwork
         /// Constructor for Neural Network
         /// </summary>
         /// <param name="layers">Number of neurons in each layer</param>
-        public NeuralNetwork(int[] layers)
+        public NeuralNetwork(int[] layers, T[] interpretations)
         {
             this.layers = new int[layers.Length];  
             for (int i = 0; i < layers.Length; i++)
@@ -38,6 +43,16 @@ namespace NeuralNetwork
             InitNeurons();
             InitWeights();
             InitBiases();
+            interpret(interpretations);
+        }
+
+        private void interpret(T[] interpretations)
+        {
+            interpretation = new T[interpretations.Length];
+            for (int i = 0; i < interpretations.Length; i++)
+            {
+                interpretation[i] = interpretations[i];
+            }
         }
 
         /// <summary>
@@ -186,12 +201,24 @@ namespace NeuralNetwork
             }
         }
 
-        public void calculateCost(byte value)
+        /// <summary>
+        /// Calculate the cost and add to the overall average cost
+        /// </summary>
+        /// <param name="value"></param>
+        public void calculateCost(T value)
         {
             float costTemp = 0.0f;
             int lastLayer = layers.Length - 1;
             float expectedOutput = 0.0f;
-            int v = Convert.ToInt32(value);
+            int v = 0;
+            for (int i = 0; i < interpretation.Length; i++)
+            {
+                if (interpretation[i].Equals(value))
+                {
+                    v = i;
+                    break;
+                }
+            }
 
             //Loops at the output layer
             for (int i = 0; i < neurons[lastLayer].Length; i++)
@@ -209,6 +236,29 @@ namespace NeuralNetwork
                 }
             }
             cost[v] = (cost[v] + costTemp) / 2;
+        }
+
+        /// <summary>
+        /// Given an input, determine the output
+        /// </summary>
+        /// <param name="inputs">input data</param>
+        /// <returns>Result index</returns>
+        public T determine(float[] inputs)
+        {
+            T result = default(T);
+            getInputs(inputs);
+            calcOutput();
+            for (int i = 0; i < neurons[layers.Length - 1].Length; i++)
+            {
+                float curMax = 0;
+                if (neurons[layers.Length - 1][i] >= threshold &&
+                    neurons[layers.Length - 1][i] > curMax)
+                {
+                    result = interpretation[i];
+                    curMax = neurons[layers.Length - 1][i];
+                }
+            }
+            return result;
         }
     }
 }
