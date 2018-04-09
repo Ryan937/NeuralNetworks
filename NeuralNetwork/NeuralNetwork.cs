@@ -140,15 +140,12 @@ namespace NeuralNetwork
         /// Each neurons take a part of the image and stores "a" into neurons array
         /// </summary>
         /// <param name="inputs">The float array of inputs</param>
-        private void getInputs(float[][] inputs)
+        public void getInputs(float[] inputs)
         {
-            for (int i = 0, index = 0; i < inputs.Length; i++)
+            for (int i = 0; i < inputs.Length; i++)
             {
-                for (int j = 0; j < inputs[i].Length; j++)
-                { 
-                    // always storing to first layer since it is an input
-                    neurons[0][index++] = inputs[i][j];
-                }
+                // always storing to first layer since it is an input
+                neurons[0][i] = inputs[i];
             }
         }
 
@@ -156,7 +153,7 @@ namespace NeuralNetwork
         /// Calculates neurons * weights + biases to get 10 outputs.
         /// The outputs will be saved in neurons array.
         /// </summary>
-        private void calcOutput()
+        public void calcOutput()
         {
             float sum = 0;
 
@@ -189,7 +186,7 @@ namespace NeuralNetwork
             }
         }
 
-        private void calculateCost(byte value)
+        public void calculateCost(byte value)
         {
             float costTemp = 0.0f;
             int lastLayer = layers.Length - 1;
