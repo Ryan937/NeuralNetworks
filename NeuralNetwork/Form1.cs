@@ -420,12 +420,6 @@ namespace NeuralNetwork
             saveToolStripMenuItem.ForeColor = themeColor;
         }
 
-<<<<<<< HEAD
-        private void weightsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            int[] layers = new int[] {16, 12, 8, 4};
-            NeuralNetwork nw = new NeuralNetwork(layers);
-=======
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
@@ -454,7 +448,6 @@ namespace NeuralNetwork
                     pictureBoxTwo.Image = data[0];
                 }
             }
->>>>>>> 1768d8ce4a56cc3dbda2f7fe325e4fbd355b75af
         }
     }
 }
