@@ -139,18 +139,15 @@ namespace NeuralNetwork
         /// <summary>
         /// Each neurons take a part of the image and stores "a" into neurons array
         /// </summary>
-        /// <param name="image">The image to be processed</param>
-        private void getInputs(Bitmap image)
+        /// <param name="inputs">The float array of inputs</param>
+        private void getInputs(float[][] inputs)
         {
-            for (int i = 0, index = 0; i < image.Height; i++)
+            for (int i = 0, index = 0; i < inputs.Length; i++)
             {
-                for (int j = 0; j < image.Width; j++)
-                {
-                    float a;
-                    Color c = image.GetPixel(i, j);
-                    a = (c.R + c.G + c.B) / 3;
+                for (int j = 0; j < inputs[i].Length; j++)
+                { 
                     // always storing to first layer since it is an input
-                    neurons[0][index++] = a;
+                    neurons[0][index++] = inputs[i][j];
                 }
             }
         }
@@ -192,17 +189,29 @@ namespace NeuralNetwork
             }
         }
 
-        private float[] calculateCost()
+        private void calculateCost(byte value)
         {
+            float costTemp = 0.0f;
             int lastLayer = layers.Length - 1;
             float expectedOutput = 0.0f;
+            int v = Convert.ToInt32(value);
 
             //Loops at the output layer
             for (int i = 0; i < neurons[lastLayer].Length; i++)
             {
-                cost[i] += (float)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
+                if (i == v)
+                {
+                    expectedOutput = 1.00f;
+                }
+
+                costTemp += (float)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
+
+                if (expectedOutput == 1.00f)
+                {
+                    expectedOutput = 0.00f;
+                }
             }
-            return cost;
+            cost[v] = (cost[v] + costTemp) / 2;
         }
     }
 }
