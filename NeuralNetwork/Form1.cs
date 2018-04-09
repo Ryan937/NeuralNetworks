@@ -35,6 +35,7 @@ namespace NeuralNetwork
         /// Main GUI variable
         /// </summary>
         private PictureBox pictureBoxOne;
+        private PictureBox pictureBoxTwo;
         private Panel panel;
         private CustomButton closeForm;
         private CustomButton minForm;
@@ -48,14 +49,22 @@ namespace NeuralNetwork
         /// </summary>
         private Graphics G;
         private Bitmap B;
+        private SolidBrush brush;
         private int width;
         private int height;
+        private const int LETTER_SIDE = 28;
+        /// <summary>
+        /// Bitmaps
+        /// </summary>
+        private Bitmap[] data;
+        private byte[] labels;
 
         public Form1()
         {
             this.themeBackgroundColor = Color.FromArgb(175, 0, 0, 0);
             this.themeBackgroundColorTwo = Color.FromArgb(100, 0, 0, 0);
             this.themeColor = Color.FromArgb(200, 144, 238, 144);
+            this.brush = new SolidBrush(Color.Cyan);
             InitializeComponent();
             InitializeCustom();
             InitializeDrawing();
@@ -68,7 +77,7 @@ namespace NeuralNetwork
         /// </summary>
         private void InitializeDrawing()
         {
-            B = new Bitmap(1000 / 2 - PICTUREBOX_OFFSET * 3 / 2, 600 - 54 - PICTUREBOX_OFFSET * 2);
+            B = new Bitmap(28, 28);
             G = Graphics.FromImage(B);
         }
 
@@ -76,8 +85,9 @@ namespace NeuralNetwork
         {
             if (e.Button == MouseButtons.Left)
             {
-                Debug.WriteLine(e.X + " " + e.Y);
-                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(e.X, e.Y), new Size(1, 1)));
+                int cX = (int)((double)e.X / (double)pictureBoxOne.Width * LETTER_SIDE);
+                int cY = (int)((double)e.Y / (double)pictureBoxOne.Width * LETTER_SIDE);
+                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(cX, cY), new Size(1, 1)));
             }
             pictureBoxOne.Image = B;
         }
@@ -102,6 +112,14 @@ namespace NeuralNetwork
             pictureBoxOne.BackColor = themeBackgroundColorTwo;
             pictureBoxOne.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxOne.MouseMove += new MouseEventHandler(this.pictureBoxOne_MouseMove);
+            // 
+            // pictureBoxTwo shown on the right
+            //
+            pictureBoxTwo = new PictureBox();
+            pictureBoxTwo.Name = "pictureBoxTwo";
+            pictureBoxTwo.TabStop = false;
+            pictureBoxTwo.BackColor = themeBackgroundColorTwo;
+            pictureBoxTwo.SizeMode = PictureBoxSizeMode.StretchImage;
             //
             // conext menu for pictureBoxOne
             //
@@ -120,6 +138,7 @@ namespace NeuralNetwork
             panel.Name = "panel1";
             panel.Size = new System.Drawing.Size(this.Width, this.Height - 25);
             panel.Controls.Add(pictureBoxOne);
+            panel.Controls.Add(pictureBoxTwo);
             // 
             // closeForm
             // 
@@ -217,6 +236,8 @@ namespace NeuralNetwork
                 maxForm.Location = new Point(w - MAX_FORM_HORZ_OFFSET, 0);
                 minForm.Location = new Point(w - MIN_FORM_HORZ_OFFSET, 0);
                 pictureBoxOne.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
+                pictureBoxTwo.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
+                pictureBoxTwo.Location = new Point(w / 2 + PICTUREBOX_OFFSET / 2, 27 + PICTUREBOX_OFFSET);
             }
         }
 
@@ -399,10 +420,41 @@ namespace NeuralNetwork
             saveToolStripMenuItem.ForeColor = themeColor;
         }
 
+<<<<<<< HEAD
         private void weightsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int[] layers = new int[] {16, 12, 8, 4};
             NeuralNetwork nw = new NeuralNetwork(layers);
+=======
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.Title = "Open Data";
+                string path = "";
+                string secondPath = "";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    path = dialog.FileName;
+                }
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    secondPath = dialog.FileName;
+                }
+                if (path.Contains("labels") &&
+                    secondPath.Contains("images"))
+                {
+                    MnistLoader.LoadMnist(path, secondPath, out data, out labels);
+                    pictureBoxTwo.Image = data[0];
+                }
+                else if (secondPath.Contains("labels") &&
+                    path.Contains("images"))
+                {
+                    MnistLoader.LoadMnist(secondPath, path, out data, out labels);
+                    pictureBoxTwo.Image = data[0];
+                }
+            }
+>>>>>>> 1768d8ce4a56cc3dbda2f7fe325e4fbd355b75af
         }
     }
 }

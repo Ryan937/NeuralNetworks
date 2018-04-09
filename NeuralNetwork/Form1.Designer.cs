@@ -34,8 +34,11 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+<<<<<<< HEAD
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.weightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+=======
+>>>>>>> 1768d8ce4a56cc3dbda2f7fe325e4fbd355b75af
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -68,6 +71,7 @@
             | System.Windows.Forms.Keys.O)));
             this.openToolStripMenuItem.Size = new System.Drawing.Size(213, 26);
             this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
@@ -81,6 +85,7 @@
             // 
             this.openFileDialog.FileName = "openFileDialog";
             // 
+<<<<<<< HEAD
             // testToolStripMenuItem
             // 
             this.testToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -96,6 +101,8 @@
             this.weightsToolStripMenuItem.Text = "Weights";
             this.weightsToolStripMenuItem.Click += new System.EventHandler(this.weightsToolStripMenuItem_Click);
             // 
+=======
+>>>>>>> 1768d8ce4a56cc3dbda2f7fe325e4fbd355b75af
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
