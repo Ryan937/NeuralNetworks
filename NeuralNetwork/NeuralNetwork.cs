@@ -11,6 +11,9 @@ namespace NeuralNetwork
     class NeuralNetwork
     {
         private int[] layers;
+        /// <summary>
+        /// Layers of neurons of the neural network
+        /// </summary>
         private float[][] neurons;
         private float[][][] weights;
         private float[][] biases;
@@ -51,6 +54,7 @@ namespace NeuralNetwork
                     neurons[i][j] = 0.0f;
                 }
             }
+            cost = new float[layers[layers.Length - 1]];
         }
 
         /// <summary>
@@ -138,14 +142,15 @@ namespace NeuralNetwork
         /// <param name="image">The image to be processed</param>
         private void getInputs(Bitmap image)
         {
-            for (int i = 0; i < image.Height; i++)
+            for (int i = 0, index = 0; i < image.Height; i++)
             {
                 for (int j = 0; j < image.Width; j++)
                 {
                     float a;
                     Color c = image.GetPixel(i, j);
                     a = (c.R + c.G + c.B) / 3;
-                    neurons[i][j] = a;
+                    // always storing to first layer since it is an input
+                    neurons[0][index++] = a;
                 }
             }
         }
@@ -160,29 +165,42 @@ namespace NeuralNetwork
 
             for (int i = 0; i < layers.Length - 1; i++)
             {
-                for (int j = 0; j < neurons[i].Length; j++)
+                // next layer size
+                for (int n = 0; n < weights[i].Length; n++)
                 {
-                    for (int k = 0; k < weights[i][j].Length; k++)
+                    // weights of each neuron in this layer
+                    for (int w = 0; w < weights[i][n].Length; w++)
                     {
-                        sum += neurons[i][j] * weights[i][j][k];
+                        sum += neurons[i][w] * weights[i][n][w];
                     }
-                    sum += biases[i][j];
+                    sum += biases[i][n];
                     sum = Sigmoid(sum);
-                    neurons[i][j] = sum;
+                    neurons[i + 1][n] = sum;
                 }
+
+                //for (int j = 0; j < neurons[i].Length; j++)
+                //{
+                //    for (int k = 0; k < weights[i][j].Length; k++)
+                //    {
+                //        sum += neurons[i][j] * weights[i][j][k];
+                //    }
+                //    sum += biases[i][j];
+                //    sum = Sigmoid(sum);
+                //    // layer + 1 for storing result
+                //    neurons[i + 1][j] = sum;
+                //}
             }
         }
 
-        private float calculateCost()
+        private float[] calculateCost()
         {
-            float cost = 0.0f;
             int lastLayer = layers.Length - 1;
             float expectedOutput = 0.0f;
 
             //Loops at the output layer
             for (int i = 0; i < neurons[lastLayer].Length; i++)
             {
-                cost += (float)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
+                cost[i] += (float)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
             }
             return cost;
         }

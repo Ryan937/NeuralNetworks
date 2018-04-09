@@ -69,6 +69,7 @@ namespace NeuralNetwork
             InitializeCustom();
             InitializeDrawing();
             CustomizeMenuStrip(menuStrip1);
+            NeuralNetwork nw = new NeuralNetwork(new int[] {10, 16, 16, 10 });
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
 
