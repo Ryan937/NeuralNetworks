@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork
 {
+    struct gradientVector
+    {
+        public float[] weights;
+        public float[] biases;
+    };
+
     class NeuralNetwork
     {
         private int[] layers;
@@ -18,6 +24,7 @@ namespace NeuralNetwork
         private float[][][] weights;
         private float[][] biases;
         private float[] cost;
+        gradientVector gradientVector;
 
         private Random random;
 
@@ -27,7 +34,7 @@ namespace NeuralNetwork
         /// <param name="layers">Number of neurons in each layer</param>
         public NeuralNetwork(int[] layers)
         {
-            this.layers = new int[layers.Length];  
+            this.layers = new int[layers.Length];
             for (int i = 0; i < layers.Length; i++)
             {
                 this.layers[i] = layers[i];
@@ -71,7 +78,7 @@ namespace NeuralNetwork
                 for (int j = 0; j < weights[i - 1].Length; j++)
                 {
                     //position of the weight (784)
-                    weights[i - 1][j] = new float[neurons[i-1].Length];
+                    weights[i - 1][j] = new float[neurons[i - 1].Length];
                     for (int k = 0; k < neurons[i - 1].Length; k++)
                     {
                         float randNum = (float)random.NextDouble() - 0.5f;
@@ -79,7 +86,7 @@ namespace NeuralNetwork
                     }
                 }
             }
-            
+
             //Test for above triple for loop
             /*for (int i = 0; i < weights.Length - 1; i++)
             {
@@ -111,7 +118,7 @@ namespace NeuralNetwork
                 }
             }
         }
-        
+
         /*private float randVariables()
         {
             float mean = 100;
@@ -125,7 +132,7 @@ namespace NeuralNetwork
 
             return randNormal;
         }*/
-        
+
         /// <summary>
         /// Sigmoid function to make the value of "a" to be somewhere 0 to 1 
         /// </summary>
@@ -134,6 +141,16 @@ namespace NeuralNetwork
         private float Sigmoid(float x)
         {
             return (float)(1 / (1 + Math.Exp(-x)));
+        }
+
+        /// <summary>
+        /// Derivative of the sigmoid function
+        /// </summary>
+        /// <param name="x">The "a"</param>
+        /// <returns>Derivative of the sigmoid "a"</returns>
+        private float derivativeSigmoid(float x)
+        {
+            return (float)(Math.Exp(-x) / Math.Pow((1 + Math.Exp(-x)), 2));
         }
 
         /// <summary>
@@ -209,6 +226,21 @@ namespace NeuralNetwork
                 }
             }
             cost[v] = (cost[v] + costTemp) / 2;
+        }
+
+        private void calcGradientVector()
+        {
+            //neurons[L-1][] * derivativeSigmoid(neurons[L][]) * 2(cost[L])
+            for (int i = layers.Length; i <= 0; i--)
+            {
+                for (int j = 0; j < neurons[i].Length; j++)
+                {
+                    gradientVector.weights[j] += (neurons[i - 1][j] *
+                        derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+
+                    gradientVector.biases[j] += (derivativeSigmoid(neurons[i][j]) * 2 * (cost[i])) / 2;
+                }
+            }
         }
     }
 }
