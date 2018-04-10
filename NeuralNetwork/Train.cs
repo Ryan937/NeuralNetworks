@@ -8,6 +8,18 @@ namespace NeuralNetwork
 {
     class Train<T>
     {
+        public struct DataStruct
+        {
+            public float[][] data;
+            public T[] labels;
+
+            public DataStruct(float[][] data, T[] labels)
+            {
+                this.data = data;
+                this.labels = labels;
+            }
+        }
+
         /// <summary>
         /// Train a network using given data, label, and batchSize
         /// </summary>
@@ -19,19 +31,27 @@ namespace NeuralNetwork
         public static void trainNetwork(NeuralNetwork<T> nn, 
             float[][] data, T[] labels, int epochs)
         {
+            DataStruct dataS = ArrayTransform.Shuffle<T>(data, labels);
             int batchSize = (int)Math.Ceiling((double)labels.Length / epochs);
             int curData = 0;
+            int curBackProp = 0;
             for (int e = 0; e < epochs; e++)
             {
                 for (int batchIndex = 0; batchIndex < batchSize &&
                     curData < labels.Length; batchIndex++, curData++)
                 {
-                    nn.getInputs(data[curData]);
+                    nn.getInputs(dataS.data[curData], dataS.labels[curData]);
                     nn.calcOutput();
-                    nn.calculateCost(labels[curData]);
+                    nn.calculateCost(dataS.labels[curData]);
                 }
-                nn.calcGradientVector();
-                trainResult(nn, data, labels, epochs, e, curData);
+                for (int batchIndex = 0; batchIndex < batchSize &&
+                    curBackProp < labels.Length; batchIndex++, curBackProp++)
+                {
+                    nn.getInputs(dataS.data[curBackProp], dataS.labels[curBackProp]);
+                    nn.calcOutput();
+                    nn.calcGradientVector();
+                }
+                trainResult(nn, data, labels, epochs, e, curData - batchSize);
             }
         }
 

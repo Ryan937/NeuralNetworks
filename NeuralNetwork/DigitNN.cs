@@ -38,7 +38,7 @@ namespace NeuralNetwork
                     for (int w = 0; w < IMAGE_SIDE; w++)
                     {
                         Color c = data[i].GetPixel(w, h);
-                        result[i][index++] = (c.R + c.G + c.B) / 3.0f;
+                        result[i][index++] = (c.R + c.G + c.B) / 3.0f / 255.0f;
                     }
                 }
             }

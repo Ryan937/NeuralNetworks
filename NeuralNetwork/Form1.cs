@@ -514,7 +514,7 @@ namespace NeuralNetwork
         /// <param name="e">event</param>
         private void newDigitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int[] layers = new int[4] { 784, 16, 16, 10 };
+            int[] layers = new int[3] { 784, 100, 10 };
             DigitNN.init(out digitNw, layers);
         }
 
@@ -528,8 +528,12 @@ namespace NeuralNetwork
             if (data != null && labels != null && digitNw != null)
             {
                 float[][] trainData = DigitNN.transformBitmapdata(data);
-                int batchSize = 2;
-                Train<byte>.trainNetwork(digitNw, trainData, labels, batchSize);
+                int epochs = 10;
+                if (labels.Length == 60000)
+                {
+                    epochs = 30;
+                }
+                Train<byte>.trainNetwork(digitNw, trainData, labels, epochs);
             }
             else
             {

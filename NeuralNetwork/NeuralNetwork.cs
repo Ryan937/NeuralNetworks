@@ -35,7 +35,7 @@ namespace NeuralNetwork
         /// <summary>
         /// A threshold for determining output validity
         /// </summary>
-        private const float threshold = 0.8f;
+        private const float threshold = 0.5f;
 
         private Random random;
 
@@ -201,6 +201,19 @@ namespace NeuralNetwork
         }
 
         /// <summary>
+        /// Get inpu without label attached, for determining uses mostly
+        /// </summary>
+        /// <param name="inputs">Input array</param>
+        public void getInputs(float[] inputs)
+        {
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                // always storing to first layer since it is an input
+                neurons[0][i] = inputs[i];
+            }
+        }
+
+        /// <summary>
         /// Calculates neurons * weights + biases to get 10 outputs.
         /// The outputs will be saved in neurons array.
         /// </summary>
@@ -286,22 +299,28 @@ namespace NeuralNetwork
 
         public void calcGradientVector()
         {
+            InitdCda();
+            BackPropOutput();
+            for (int i = layers.Length - 2; i > 0; i--)
+            {
+                BackPropHidden(i);
+            }
             //neurons[L-1][] * derivativeSigmoid(neurons[L][]) * 2(cost[L])
             //
             //  I       H        O
             //  784    100       10
-            int weightSize = 0;
-            int biasesSize = 0;
-            for (int i = 0; i < layers.Length - 1; i++)
-            {
-                weightSize += layers[i] * layers[i + 1];
-            }
-            gradientVector.weights = new float[weightSize];
-            for (int i = 1; i < layers.Length; i++)
-            {
-                biasesSize += layers[i];
-            }
-            gradientVector.biases = new float[biasesSize];
+            //int weightSize = 0;
+            //int biasesSize = 0;
+            //for (int i = 0; i < layers.Length - 1; i++)
+            //{
+            //    weightSize += layers[i] * layers[i + 1];
+            //}
+            //gradientVector.weights = new float[weightSize];
+            //for (int i = 1; i < layers.Length; i++)
+            //{
+            //    biasesSize += layers[i];
+            //}
+            //gradientVector.biases = new float[biasesSize];
             // last input
             // do for every neuron to all neuron
             //  I       H        O       Y
@@ -315,26 +334,93 @@ namespace NeuralNetwork
             // 784  w   1        -
             // 784  w  ...       -
             // 784  w  100       -
-            for (int i = layers.Length - 1, index = 0; i > 0; i--)
+            //for (int i = layers.Length - 1, index = 0; i > 0; i--)
+            //{
+            //    for (int j = 0; j < neurons[i].Length; j++)
+            //    {
+            //        for (int w = 0; w < weights[i - 1][j].Length; w++)
+            //        {
+            //            dCda[i - 1][j][w] = calcdCda(i, j, w);
+            //            // cost size 10 (last layer's size)
+            //            // last layer       -    10 neurons
+            //            // last layer - 1   -    100 neurons 
+            //            gradientVector.weights[index++] = neurons[i - 1][j] *
+            //                derivativeSigmoid(neurons[i][j]) * 2 * Math.Sqrt(cost[;
+
+            //        }
+
+            //        gradientVector.biases[j] = derivativeSigmoid(neurons[i][j]) * 2 * (cost[i]);
+            //    }
+            //}
+            //addGradVectToWeight();
+            //addGradVectToBias();
+        }
+
+        /// <summary>
+        /// Back propagation for the output layer
+        /// </summary>
+        private void BackPropOutput()
+        {
+            int L = layers.Length - 1;
+            // for every neuron, i, in the last layer
+            for (int i = 0; i < layers[L]; i++)
             {
-                for (int j = 0; j < neurons[i].Length; j++)
+                // for every weights of the last layer
+                for (int w = 0; w < weights[L - 1][i].Length; w++)
                 {
-                    for (int w = 0; w < weights[i - 1][j].Length; w++)
+                    int y = 0;
+                    // if the neuron index is the expectedIndex
+                    if (i == expectedIndex)
                     {
-                        dCda[i - 1][j][w] = calcdCda(i, j, w);
-                        // cost size 10 (last layer's size)
-                        // last layer       -    10 neurons
-                        // last layer - 1   -    100 neurons 
-                        gradientVector.weights[index++] = neurons[i - 1][j] *
-                            derivativeSigmoid(neurons[i][j]) * 2 * Math.Sqrt(cost[;
-
+                        y = 1;
                     }
-
-                    gradientVector.biases[j] = derivativeSigmoid(neurons[i][j]) * 2 * (cost[i]);
+                    // calculate and store dCda
+                    dCda[L - 1][i][w] = 2.0f * (neurons[L][i] - y);
+                    // adjust weights using learning rate and dCdw
+                    weights[L - 1][i][w] += -n * neurons[L - 1][w] * dCda[L - 1][i][w];
+                    biases[L - 1][i] += -n * derivativeSigmoid(calcZ(L, i, w)) * dCda[L - 1][i][w];
                 }
             }
-            addGradVectToWeight();
-            addGradVectToBias();
+        }
+
+        /// <summary>
+        /// Back propagation on given hidden layer
+        /// </summary>
+        /// <param name="hL">hidden layer with respect to number of layers - 1</param>
+        private void BackPropHidden(int hL)
+        {
+            // hL is the hidden layer with respect to numbeer of layers - 1
+            // for every neuron in this hidden layer
+            for (int i = 0; i < layers[hL]; i++)
+            {
+                // we have previous layer's dCda[hL]
+                // for every weight to be adjusted
+                for (int w = 0; w < weights[hL - 1][i].Length; w++)
+                {
+                    for (int curdCda = 0; curdCda < dCda[hL].Length; curdCda++)
+                    {
+                        dCda[hL - 1][i][w] += neurons[hL - 1][curdCda] * derivativeSigmoid(calcZ(hL, curdCda, i)) * dCda[hL][curdCda][i];
+                    }
+                    weights[hL - 1][i][w] += -n * neurons[hL - 1][w] * dCda[hL - 1][i][w];
+                    biases[hL - 1][i] += -n * derivativeSigmoid(calcZ(hL, i, w)) * dCda[hL - 1][i][w];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initialize dCda array
+        /// </summary>
+        private void InitdCda()
+        {
+            dCda = new float[weights.Length][][];
+            for (int i = 0; i < dCda.Length; i++)
+            {
+                dCda[i] = new float[weights[i].Length][];
+                for (int j = 0; j < dCda[i].Length; j++)
+                {
+                    dCda[i][j] = new float[weights[i][j].Length];
+                }
+            }
         }
 
         private float calcdCdW(int L, int n, int w)
@@ -346,9 +432,8 @@ namespace NeuralNetwork
             //
             float dCdw = 0.0f;
             // Starting from L2 with respect to weight layers
-            // for every connection calculate and sum 
+            // for every connection calculate and sum
             
-            dCda = new float[weights.Length][][];
             for (int i = layers.Length - 1; i > L; i++)
             {
                 for (int mN = 0; mN < neurons[i].Length; mN++)
@@ -362,7 +447,6 @@ namespace NeuralNetwork
                 }
             }
 
-
             if (L == layers.Length - 1)
             {
                 dCdw = weights[L - 1][n][w] * derivativeSigmoid(calcZ(L, n, w));
@@ -370,19 +454,11 @@ namespace NeuralNetwork
             return 0.0f;
         }
 
-        private float calcdCda(int L, int n, int w)
-        {
-            int y = 0;
-            if (n == expectedIndex)
-            {
-                y = 1;
-            }
-            if (L == layers.Length - 1)
-            {
-                return 2.0f * (neurons[L][n] - y);
-            }
-            return 2.0f * weights[L][n][w] * derivativeSigmoid(calcZ(L, n, w) * (neurons[L][n] - y));
-        }
+        //private float calcdCda(int L, int n, int w)
+        //{
+
+        //    return 2.0f * weights[L][n][w] * derivativeSigmoid(calcZ(L, n, w) * (neurons[L][n] - y));
+        //}
 
         private float calcZ(int L, int n, int w)
         {
