@@ -53,7 +53,6 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="HashMap.cs" />
     <Compile Include="MnistLoader.cs" />
     <Compile Include="NeuralNetwork.cs" />
     <Compile Include="DigitNN.cs" />

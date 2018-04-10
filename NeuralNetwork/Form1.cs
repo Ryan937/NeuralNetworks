@@ -25,17 +25,20 @@ namespace NeuralNetwork
         private const int CLOSE_FORM_HORZ_OFFSET = 30;
         private const int PANEL_VERT_OFFSET = 25;
         private const int PICTUREBOX_OFFSET = 25;
+        private const int PICTUREBOX_OFFSET_HALF = 12;
         private const int MAX_FORM_HORZ_OFFSET = 60;
         private const int MIN_FORM_HORZ_OFFSET = 90;
         private const int LEFT_OFFSET = 14;
         private const int LABEL_SIZE = 24;
         private const int BUTTON_GAP = 3;
         private const float BUTTON_FONT_SIZE = 8f;
+        private const int AI_TEXTBOX_SIZE = 100;
         /// <summary>
         /// Main GUI variable
         /// </summary>
         private PictureBox pictureBoxOne;
-        private PictureBox pictureBoxTwo;
+        private PictureBox pictureBoxAI;
+        private Panel aiPanel;
         private Panel panel;
         private CustomButton closeForm;
         private CustomButton minForm;
@@ -44,6 +47,7 @@ namespace NeuralNetwork
         private Color themeBackgroundColor;
         private Color themeBackgroundColorTwo;
         private TextBox title;
+        private CustomTextBox aiTextBox;
         /// <summary>
         /// Variables for drawing
         /// </summary>
@@ -117,13 +121,35 @@ namespace NeuralNetwork
             pictureBoxOne.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxOne.MouseMove += new MouseEventHandler(this.pictureBoxOne_MouseMove);
             // 
-            // pictureBoxTwo shown on the right
+            // ai panel shown on the right
             //
-            pictureBoxTwo = new PictureBox();
-            pictureBoxTwo.Name = "pictureBoxTwo";
-            pictureBoxTwo.TabStop = false;
-            pictureBoxTwo.BackColor = themeBackgroundColorTwo;
-            pictureBoxTwo.SizeMode = PictureBoxSizeMode.StretchImage;
+            aiPanel = new Panel();
+            aiPanel.Name = "aiPanel";
+            aiPanel.TabStop = false;
+            aiPanel.BackColor = themeBackgroundColorTwo;
+            //
+            // pictureBoxAI in ai panel
+            //
+            pictureBoxAI = new PictureBox();
+            pictureBoxAI.Location = new Point(PICTUREBOX_OFFSET_HALF, PICTUREBOX_OFFSET_HALF);
+            pictureBoxAI.Name = "pictureBoxAI";
+            pictureBoxAI.BackColor = themeBackgroundColorTwo;
+            aiPanel.Controls.Add(pictureBoxAI);
+            //
+            // aiTextBox
+            //
+            aiTextBox = new CustomTextBox();
+            aiTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            aiTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            aiTextBox.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F,
+                System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            aiTextBox.Name = "Title";
+            aiTextBox.ReadOnly = true;
+            aiTextBox.Enabled = false;
+            aiTextBox.TabStop = false;
+            aiTextBox.Multiline = true;
+            aiTextBox.Text = "Hello there!";
+            aiPanel.Controls.Add(aiTextBox);
             //
             // conext menu for pictureBoxOne
             //
@@ -142,7 +168,7 @@ namespace NeuralNetwork
             panel.Name = "panel1";
             panel.Size = new System.Drawing.Size(this.Width, this.Height - 25);
             panel.Controls.Add(pictureBoxOne);
-            panel.Controls.Add(pictureBoxTwo);
+            panel.Controls.Add(aiPanel);
             // 
             // closeForm
             // 
@@ -240,8 +266,11 @@ namespace NeuralNetwork
                 maxForm.Location = new Point(w - MAX_FORM_HORZ_OFFSET, 0);
                 minForm.Location = new Point(w - MIN_FORM_HORZ_OFFSET, 0);
                 pictureBoxOne.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
-                pictureBoxTwo.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
-                pictureBoxTwo.Location = new Point(w / 2 + PICTUREBOX_OFFSET / 2, 27 + PICTUREBOX_OFFSET);
+                aiPanel.Size = new Size(w / 2 - PICTUREBOX_OFFSET * 3 / 2, h - 54 - PICTUREBOX_OFFSET * 2);
+                aiPanel.Location = new Point(w / 2 + PICTUREBOX_OFFSET_HALF, 27 + PICTUREBOX_OFFSET);
+                pictureBoxAI.Size = new Size(aiPanel.Size.Width - PICTUREBOX_OFFSET_HALF * 2, aiPanel.Size.Height - PICTUREBOX_OFFSET_HALF * 3 - AI_TEXTBOX_SIZE);
+                aiTextBox.Location = new Point(PICTUREBOX_OFFSET_HALF, pictureBoxAI.Size.Height + PICTUREBOX_OFFSET_HALF * 2);
+                aiTextBox.Size = new Size(pictureBoxAI.Size.Width, AI_TEXTBOX_SIZE);
             }
         }
 
@@ -411,6 +440,22 @@ namespace NeuralNetwork
             }
         }
 
+        public class CustomTextBox : TextBox
+        {
+            public CustomTextBox()
+            {
+                this.SetStyle(ControlStyles.UserPaint, true);
+
+                //InitializeComponent();
+            }
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                SolidBrush drawBrush = new SolidBrush(Color.Cyan); //Use the ForeColor property
+                                                                  // Draw string to screen.
+                e.Graphics.DrawString(Text, Font, drawBrush, 0f, 0f); //Use the Font property
+            }
+        }
+
         /// <summary>
         /// Customize menuStrip's color
         /// </summary>
@@ -429,6 +474,11 @@ namespace NeuralNetwork
             digitToolStripMenuItem.ForeColor = themeColor;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog dialog = new OpenFileDialog())
@@ -448,17 +498,20 @@ namespace NeuralNetwork
                     secondPath.Contains("images"))
                 {
                     MnistLoader.LoadMnist(path, secondPath, out data, out labels);
-                    pictureBoxTwo.Image = data[0];
                 }
                 else if (secondPath.Contains("labels") &&
                     path.Contains("images"))
                 {
                     MnistLoader.LoadMnist(secondPath, path, out data, out labels);
-                    pictureBoxTwo.Image = data[0];
                 }
             }
         }
 
+        /// <summary>
+        /// Create a new digit neural network
+        /// </summary>
+        /// <param name="sender">sender object</param>
+        /// <param name="e">event</param>
         private void newDigitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int[] layers = new int[4] { 784, 16, 16, 10 };
