@@ -529,11 +529,13 @@ namespace NeuralNetwork
             {
                 float[][] trainData = DigitNN.transformBitmapdata(data);
                 int epochs = 10;
+                int batchSize = 1000;
                 if (labels.Length == 60000)
                 {
                     epochs = 30;
+                    batchSize = 10000;
                 }
-                Train<byte>.trainNetwork(digitNw, trainData, labels, epochs);
+                Train<byte>.trainNetwork(digitNw, trainData, labels, epochs, batchSize);
             }
             else
             {

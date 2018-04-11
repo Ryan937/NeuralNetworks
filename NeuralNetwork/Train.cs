@@ -29,29 +29,31 @@ namespace NeuralNetwork
         /// <param name="batchSize">Batch size</param>
         /// <returns></returns>
         public static void trainNetwork(NeuralNetwork<T> nn, 
-            float[][] data, T[] labels, int epochs)
+            float[][] data, T[] labels, int epochs, int batchSize)
         {
-            DataStruct dataS = ArrayTransform.Shuffle<T>(data, labels);
-            int batchSize = (int)Math.Ceiling((double)labels.Length / epochs);
-            int curData = 0;
-            int curBackProp = 0;
             for (int e = 0; e < epochs; e++)
             {
-                for (int batchIndex = 0; batchIndex < batchSize &&
-                    curData < labels.Length; batchIndex++, curData++)
+                nn.BackPropInit(batchSize);
+                nn.InitdCda();
+                DataStruct dataS = ArrayTransform.Shuffle<T>(data, labels);
+                for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
-                    nn.getInputs(dataS.data[curData], dataS.labels[curData]);
+                    nn.getInputs(dataS.data[batchIndex], dataS.labels[batchIndex]);
                     nn.calcOutput();
-                    nn.calculateCost(dataS.labels[curData]);
+                    nn.calculateCost(dataS.labels[batchIndex]);
+//                    nn.calcGradientVector();
                 }
-                for (int batchIndex = 0; batchIndex < batchSize &&
-                    curBackProp < labels.Length; batchIndex++, curBackProp++)
+                nn.calcdCda();
+                for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
-                    nn.getInputs(dataS.data[curBackProp], dataS.labels[curBackProp]);
+                    nn.getInputs(dataS.data[batchIndex], dataS.labels[batchIndex]);
                     nn.calcOutput();
                     nn.calcGradientVector();
                 }
-                trainResult(nn, data, labels, epochs, e, curData - batchSize);
+                nn.BackPropApplication();
+                nn.resetCost();
+                trainResult(nn, dataS.data, dataS.labels, e, batchSize);
+//                nn.resetCost();
             }
         }
 
@@ -65,15 +67,12 @@ namespace NeuralNetwork
         /// <param name="curEpoch">current epoch</param>
         /// <param name="index">current data index</param>
         public static void trainResult(NeuralNetwork<T> nn,
-            float[][] data, T[] labels, int epochs, int curEpoch, int index)
+            float[][] data, T[] labels, int curEpoch, int batchSize)
         {
-            int batchSize = (int)Math.Ceiling((double)labels.Length / epochs);
-            int curData = index;
             int success = 0;
-            for (int batchIndex = 0; batchIndex < batchSize &&
-                curData < labels.Length; batchIndex++, curData++)
+            for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
             {
-                if (labels[curData].Equals(nn.determine(data[curData])))
+                if (labels[batchIndex].Equals(nn.determine(data[batchIndex])))
                 {
                     success++;
                 }
