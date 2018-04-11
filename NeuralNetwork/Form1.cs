@@ -95,7 +95,7 @@ namespace NeuralNetwork
             {
                 int cX = (int)((double)e.X / (double)pictureBoxOne.Width * LETTER_SIDE);
                 int cY = (int)((double)e.Y / (double)pictureBoxOne.Width * LETTER_SIDE);
-                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(cX, cY), new Size(1, 1)));
+                G.DrawEllipse(Pens.Cyan, new Rectangle(new Point(cX, cY), new Size(2, 2)));
             }
             pictureBoxOne.Image = B;
         }
@@ -155,8 +155,8 @@ namespace NeuralNetwork
             //
             ContextMenu cm = new ContextMenu();
             MenuItem mnuClearImage = new MenuItem("Clear Drawing");
-            //mnuClearImage.Click += new EventHandler(ClearDrawing);
-            //cm.MenuItems.Add(ClearDrawing);
+            mnuClearImage.Click += new EventHandler(mnuClearImage_Click);
+            cm.MenuItems.Add(mnuClearImage);
             pictureBoxOne.ContextMenu = cm;
             // 
             // panel1
@@ -272,6 +272,16 @@ namespace NeuralNetwork
                 aiTextBox.Location = new Point(PICTUREBOX_OFFSET_HALF, pictureBoxAI.Size.Height + PICTUREBOX_OFFSET_HALF * 2);
                 aiTextBox.Size = new Size(pictureBoxAI.Size.Width, AI_TEXTBOX_SIZE);
             }
+        }
+
+        /// <summary>
+        /// Clear the images on pictureBoxOne
+        /// </summary>
+        /// <param name="sender">sender object</param>
+        /// <param name="e">event</param>
+        private void mnuClearImage_Click(object sender, EventArgs e)
+        {
+            G.Clear(Color.Transparent);
         }
 
         /// <summary>

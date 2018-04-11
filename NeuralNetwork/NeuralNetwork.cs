@@ -227,6 +227,8 @@ namespace NeuralNetwork
             }
         }
 
+
+        // Checked
         /// <summary>
         /// Calculates neurons * weights + biases to get 10 outputs.
         /// The outputs will be saved in neurons array.
@@ -358,13 +360,13 @@ namespace NeuralNetwork
             // for every neuron, i, in the last layer
             for (int i = 0; i < layers[L]; i++)
             {
-                //int y = 0;
-                //// if the neuron index is the expectedIndex
-                //if (i == expectedIndex)
-                //{
-                //    y = 1;
-                //}
-                //dCda[L - 1][i] = 2.0f * (neurons[L][i] - y);
+                int y = 0;
+                // if the neuron index is the expectedIndex
+                if (i == expectedIndex)
+                {
+                    y = 1;
+                }
+                dCda[L - 1][i] = 2.0f * (neurons[L][i] - y);
                 // for every weights of the last layer
                 for (int w = 0; w < weights[L - 1][i].Length; w++)
                 {
@@ -395,7 +397,7 @@ namespace NeuralNetwork
                 {
                     // dCda[0][0] +=   neurons[1][0...10] * dsig( weight[1] * neurons[1][0] + b[1][0..10]
 
-                    dCda[hL - 1][i] += neurons[hL][curdCda] * derivativeSigmoid(Logit(neurons[hL + 1][curdCda])) * dCda[hL][curdCda];
+                    dCda[hL - 1][i] = weights[hL][curdCda][i] * derivativeSigmoid(Logit(neurons[hL + 1][curdCda])) * dCda[hL][curdCda];
                 }
                 // we have previous layer's dCda[hL]
                 // for every weight to be adjusted
