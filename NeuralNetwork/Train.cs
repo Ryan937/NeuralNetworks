@@ -34,10 +34,10 @@ namespace NeuralNetwork
             for (int e = 0; e < epochs; e++)
             {
                 nn.BackPropInit(batchSize);
-                nn.InitdCda();
                 DataStruct dataS = ArrayTransform.Shuffle<T>(data, labels);
                 for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
+                    nn.InitdCda();
                     nn.getInputs(dataS.data[batchIndex], dataS.labels[batchIndex]);
                     nn.calcOutput();
                     nn.calculateCost(dataS.labels[batchIndex]);
@@ -46,6 +46,10 @@ namespace NeuralNetwork
                 }
                 nn.BackPropApplication();
                 trainResult(nn, dataS.data, dataS.labels, e, batchSize);
+                if (e == 9998)
+                {
+                    int wait = 0;
+                }
 //                nn.resetCost();
             }
         }

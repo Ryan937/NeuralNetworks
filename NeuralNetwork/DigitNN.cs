@@ -13,7 +13,7 @@ namespace NeuralNetwork
 
         public static void init(out NeuralNetwork<byte> nw, int[] layers)
         {
-            byte[] meaning = new byte[10];
+            byte[] meaning = new byte[layers[layers.Length - 1]];
             for (int i = 0; i < meaning.Length; i++)
             {
                 meaning[i] = (byte)i;
@@ -40,6 +40,25 @@ namespace NeuralNetwork
                         Color c = data[i].GetPixel(w, h);
                         result[i][index++] = (c.R + c.G + c.B) / 3.0f / 255.0f;
                     }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Transform bitmap data into float array
+        /// </summary>
+        /// <param name="data">Input bitmap</param>
+        /// <returns>Float format result</returns>
+        public static float[] transformBitmapdata(Bitmap data)
+        {
+            float[] result = new float[IMAGE_SIDE * IMAGE_SIDE];
+            for (int h = 0, index = 0; h < IMAGE_SIDE; h++)
+            {
+                for (int w = 0; w < IMAGE_SIDE; w++)
+                {
+                    Color c = data.GetPixel(w, h);
+                    result[index++] = (c.R + c.G + c.B) / 3.0f / 255.0f;
                 }
             }
             return result;

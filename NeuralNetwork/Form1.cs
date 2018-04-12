@@ -48,6 +48,7 @@ namespace NeuralNetwork
         private Color themeBackgroundColorTwo;
         private TextBox title;
         private CustomTextBox aiTextBox;
+        private CustomButton aiDetermineButton;
         /// <summary>
         /// Variables for drawing
         /// </summary>
@@ -77,9 +78,11 @@ namespace NeuralNetwork
             InitializeCustom();
             InitializeDrawing();
             CustomizeMenuStrip(menuStrip1);
+            // testing
+            test();
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
-
+        
         /// <summary>
         /// Initialize drawings for panel
         /// </summary>
@@ -89,6 +92,11 @@ namespace NeuralNetwork
             G = Graphics.FromImage(B);
         }
 
+        /// <summary>
+        /// Handles drawing on mouse move while left click
+        /// </summary>
+        /// <param name="sender">sender object</param>
+        /// <param name="e">event</param>
         private void pictureBoxOne_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -150,6 +158,22 @@ namespace NeuralNetwork
             aiTextBox.Multiline = true;
             aiTextBox.Text = "Hello there!";
             aiPanel.Controls.Add(aiTextBox);
+            //
+            // aiDetermineButton
+            //
+            aiDetermineButton = new CustomButton();
+            aiDetermineButton.ForeColor = Color.Cyan;
+            aiDetermineButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            aiDetermineButton.BackColor = aiTextBox.BackColor;
+            aiDetermineButton.FlatAppearance.BorderSize = 0;
+            aiDetermineButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            aiDetermineButton.Name = "aiDetermineButton";
+            aiDetermineButton.TabStop = false;
+            aiDetermineButton.Text = "\u2753";
+            aiDetermineButton.UseMnemonic = false;
+            aiDetermineButton.UseVisualStyleBackColor = true;
+            aiDetermineButton.Click += new System.EventHandler(aiDetermineButton_Click);
+            aiPanel.Controls.Add(aiDetermineButton);
             //
             // conext menu for pictureBoxOne
             //
@@ -270,7 +294,9 @@ namespace NeuralNetwork
                 aiPanel.Location = new Point(w / 2 + PICTUREBOX_OFFSET_HALF, 27 + PICTUREBOX_OFFSET);
                 pictureBoxAI.Size = new Size(aiPanel.Size.Width - PICTUREBOX_OFFSET_HALF * 2, aiPanel.Size.Height - PICTUREBOX_OFFSET_HALF * 3 - AI_TEXTBOX_SIZE);
                 aiTextBox.Location = new Point(PICTUREBOX_OFFSET_HALF, pictureBoxAI.Size.Height + PICTUREBOX_OFFSET_HALF * 2);
-                aiTextBox.Size = new Size(pictureBoxAI.Size.Width, AI_TEXTBOX_SIZE);
+                aiTextBox.Size = new Size((int)(pictureBoxAI.Size.Width * 0.9f) - PICTUREBOX_OFFSET_HALF, AI_TEXTBOX_SIZE);
+                aiDetermineButton.Location = new Point(aiTextBox.Size.Width + PICTUREBOX_OFFSET_HALF * 2, aiTextBox.Location.Y);
+                aiDetermineButton.Size = new Size(pictureBoxAI.Size.Width - aiTextBox.Size.Width - PICTUREBOX_OFFSET_HALF, aiTextBox.Size.Height);
             }
         }
 
@@ -518,6 +544,21 @@ namespace NeuralNetwork
         }
 
         /// <summary>
+        /// Determine the drawn image and determine the output
+        /// </summary>
+        /// <param name="sender">sender object</param>
+        /// <param name="e">event</param>
+        private void aiDetermineButton_Click(object sender, EventArgs e)
+        {
+            if (digitNw != null)
+            {
+                float[] input = DigitNN.transformBitmapdata(B);
+                byte result = digitNw.determine(input);
+                aiTextBox.Text += "\r\nI think it is a " + result + " :) f u im right";
+            }
+        }
+
+        /// <summary>
         /// Create a new digit neural network
         /// </summary>
         /// <param name="sender">sender object</param>
@@ -552,6 +593,78 @@ namespace NeuralNetwork
                 // handle if data not yet loaded or neural network not yet initalized
             }
 
+        }
+
+        private void test()
+        {
+            int[] layers = new int[3] { 4, 3, 3 };
+            DigitNN.init(out digitNw, layers);
+            float[][][] weights;
+            float w = 0.1f;
+            weights = new float[layers.Length - 1][][];
+            for (int i = 1; i < weights.Length + 1; i++)
+            {
+                //position of the neuron (16)
+                weights[i - 1] = new float[layers[i]][];
+                for (int j = 0; j < weights[i - 1].Length; j++)
+                {
+                    //position of the weight (784)
+                    weights[i - 1][j] = new float[layers[i - 1]];
+                    for (int k = 0; k < weights[i-1][j].Length; k++)
+                    {
+                        weights[i - 1][j][k] = w;
+                        w += 0.05f;
+                    }
+                }
+            }
+            float b = 1.0f;
+            float[][] biases = new float[layers.Length - 1][];
+            for (int i = 0; i < biases.Length; i++)
+            {
+                biases[i] = new float[layers[i + 1]];
+                for (int j = 0; j < biases[i].Length; j++)
+                {
+                    biases[i][j] = b;
+                    b -= 0.05f;
+                }
+            }
+
+            digitNw.testWB(ref weights, ref biases);
+
+            float[][] trainData = new float[100][];
+            float data = 0.1f;
+            for (int i = 0; i < trainData.Length; i++)
+            {
+                if (i == 50)
+                {
+                    data = 0.2f;
+                }
+                if (i == 75)
+                {
+                    data = 0.3f;
+                }
+                trainData[i] = new float[4];
+                trainData[i][0] = data;
+                trainData[i][1] = data;
+                trainData[i][2] = data;
+                trainData[i][3] = data;
+            }
+            byte[] labels = new byte[trainData.Length];
+            byte clabel = 0;
+            for (int i = 0; i < trainData.Length; i++)
+            {
+                if (i == 50)
+                {
+                    clabel = 1;
+                }
+                if ( i == 75 )
+                {
+                    clabel = 2;
+                }
+                labels[i] = clabel;
+            }
+
+            Train<byte>.trainNetwork(digitNw, trainData, labels, 10000, 100);
         }
     }
 }

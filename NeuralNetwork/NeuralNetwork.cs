@@ -37,7 +37,7 @@ namespace NeuralNetwork
         //private bool gradVectExist = false;
         BackPropStruct backPropstruct;
         private T[] interpretation;
-        private float n = 3.0f;
+        private float n = 1.0f;
         private T label;
         private int expectedIndex = -1;
         /// <summary>
@@ -250,19 +250,8 @@ namespace NeuralNetwork
                     sum += biases[i][n];
                     sum = Sigmoid(sum);
                     neurons[i + 1][n] = sum;
+                    sum = 0;
                 }
-
-                //for (int j = 0; j < neurons[i].Length; j++)
-                //{
-                //    for (int k = 0; k < weights[i][j].Length; k++)
-                //    {
-                //        sum += neurons[i][j] * weights[i][j][k];
-                //    }
-                //    sum += biases[i][j];
-                //    sum = Sigmoid(sum);
-                //    // layer + 1 for storing result
-                //    neurons[i + 1][j] = sum;
-                //}
             }
         }
 
@@ -372,9 +361,9 @@ namespace NeuralNetwork
                 {
                     // calculate and store dCda
                     // adjust weights using learning rate and dCdw
-                    backPropstruct.deltW[L - 1][i][w] += -n * neurons[L - 1][w] * derivativeSigmoid(Logit(neurons[L][i])) * dCda[L - 1][i];
+                    backPropstruct.deltW[L - 1][i][w] += neurons[L - 1][w] * derivativeSigmoid(Logit(neurons[L][i])) * dCda[L - 1][i];
                 }
-                backPropstruct.deltB[L - 1][i] += -n * derivativeSigmoid(Logit(neurons[L][i])) * dCda[L - 1][i];
+                backPropstruct.deltB[L - 1][i] += derivativeSigmoid(Logit(neurons[L][i])) * dCda[L - 1][i];
             }
         }
 
@@ -397,15 +386,18 @@ namespace NeuralNetwork
                 {
                     // dCda[0][0] +=   neurons[1][0...10] * dsig( weight[1] * neurons[1][0] + b[1][0..10]
 
-                    dCda[hL - 1][i] = weights[hL][curdCda][i] * derivativeSigmoid(Logit(neurons[hL + 1][curdCda])) * dCda[hL][curdCda];
+                    dCda[hL - 1][i] += weights[hL][curdCda][i] * derivativeSigmoid(Logit(neurons[hL + 1][curdCda])) * dCda[hL][curdCda];
                 }
                 // we have previous layer's dCda[hL]
                 // for every weight to be adjusted
                 for (int w = 0; w < weights[hL - 1][i].Length; w++)
                 {
-                    backPropstruct.deltW[hL - 1][i][w] += -n * neurons[hL - 1][w] * derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
+                    backPropstruct.deltW[hL - 1][i][w] += neurons[hL - 1][w] * derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
                 }
-                backPropstruct.deltB[hL - 1][i] += -n * derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
+                for (int j = 0; j < weights[hL].Length; j++)
+                {
+                    backPropstruct.deltB[hL - 1][i] += weights[hL][j][i] * derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
+                }
             }
         }
 
@@ -417,7 +409,7 @@ namespace NeuralNetwork
                 {
                     for (int k = 0; k < weights[i][j].Length; k++)
                     {
-                        weights[i][j][k] += backPropstruct.deltW[i][j][k] / (float)backPropstruct.batchSize;
+                        weights[i][j][k] -= n * backPropstruct.deltW[i][j][k] / (float)backPropstruct.batchSize;
                     }
                 }
             }
@@ -425,7 +417,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < biases[i].Length; j++)
                 {
-                    biases[i][j] += backPropstruct.deltB[i][j] / (float)backPropstruct.batchSize;
+                    biases[i][j] -= n * backPropstruct.deltB[i][j] / (float)backPropstruct.batchSize;
                 }
             }
         }
@@ -492,6 +484,12 @@ namespace NeuralNetwork
                 }
             }
             return result;
+        }
+
+        public void testWB(ref float[][][] weights, ref float[][] biases)
+        {
+            this.weights = weights;
+            this.biases = biases;
         }
     }
 }
