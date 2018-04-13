@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -55,8 +56,6 @@ namespace NeuralNetwork
         private Graphics G;
         private Bitmap B;
         private SolidBrush brush;
-        private int width;
-        private int height;
         private const int LETTER_SIDE = 28;
         /// <summary>
         /// Bitmaps
@@ -67,6 +66,7 @@ namespace NeuralNetwork
         /// Neural networks
         /// </summary>
         private NeuralNetwork<byte> digitNw;
+        public static bool digit;
 
         public Form1()
         {
@@ -78,11 +78,16 @@ namespace NeuralNetwork
             InitializeCustom();
             InitializeDrawing();
             CustomizeMenuStrip(menuStrip1);
+            digit = false;
             // testing
             //test();
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
         
+        public void AddTextToAITextBoxMethod(string text)
+        {
+
+        }
         /// <summary>
         /// Initialize drawings for panel
         /// </summary>
@@ -126,7 +131,7 @@ namespace NeuralNetwork
             pictureBoxOne.Name = "pictureBoxOne";
             pictureBoxOne.TabStop = false;
             pictureBoxOne.BackColor = themeBackgroundColorTwo;
-            pictureBoxOne.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBoxOne.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBoxOne.MouseMove += new MouseEventHandler(this.pictureBoxOne_MouseMove);
             // 
             // ai panel shown on the right
@@ -141,7 +146,8 @@ namespace NeuralNetwork
             pictureBoxAI = new PictureBox();
             pictureBoxAI.Location = new Point(PICTUREBOX_OFFSET_HALF, PICTUREBOX_OFFSET_HALF);
             pictureBoxAI.Name = "pictureBoxAI";
-            pictureBoxAI.BackColor = themeBackgroundColorTwo;
+            pictureBoxAI.BackColor = Color.Black;
+            pictureBoxAI.SizeMode = PictureBoxSizeMode.Zoom;
             aiPanel.Controls.Add(pictureBoxAI);
             //
             // aiTextBox
@@ -156,9 +162,7 @@ namespace NeuralNetwork
             aiTextBox.Enabled = false;
             aiTextBox.TabStop = false;
             aiTextBox.Multiline = true;
-            aiTextBox.ScrollBars = ScrollBars.Vertical;
-            aiTextBox.WordWrap = true;
-            aiTextBox.Text = "Hello there!";
+            aiTextBox.Text = "Hello there! :D";
             aiPanel.Controls.Add(aiTextBox);
             //
             // aiDetermineButton
@@ -535,12 +539,16 @@ namespace NeuralNetwork
                 if (path.Contains("labels") &&
                     secondPath.Contains("images"))
                 {
-                    MnistLoader.LoadMnist(path, secondPath, out data, out labels);
+                    pictureBoxAI.Image = Properties.Resources.loading;
+                    Thread t = new Thread(() => MnistLoader.LoadMnist(path, secondPath, out data, out labels, pictureBoxAI));
+                    t.Start();
                 }
                 else if (secondPath.Contains("labels") &&
                     path.Contains("images"))
                 {
-                    MnistLoader.LoadMnist(secondPath, path, out data, out labels);
+                    pictureBoxAI.Image = Properties.Resources.loading;
+                    Thread t = new Thread(() => MnistLoader.LoadMnist(secondPath, path, out data, out labels, pictureBoxAI));
+                    t.Start();
                 }
             }
         }
@@ -556,7 +564,20 @@ namespace NeuralNetwork
             {
                 float[] input = DigitNN.transformBitmapdata(B);
                 byte result = digitNw.determine(input);
-                aiTextBox.Text += "\r\nI think it is a " + result + " :)";
+                if (aiTextBox.Lines.Length == 6)
+                {
+                    Form1.CustomTextBox temp = new Form1.CustomTextBox();
+                    for (int i = 1; i < aiTextBox.Lines.Length - 1; i++)
+                    {
+                        temp.Text += aiTextBox.Lines[i] + "\n";
+                    }
+                    temp.Text += "I think it is a " + result + " :)";
+                    aiTextBox.Text = temp.Text;
+                }
+                else
+                {
+                    aiTextBox.Text += "\nI think it is a " + result + " :)";
+                }
             }
         }
 
@@ -569,6 +590,8 @@ namespace NeuralNetwork
         {
             int[] layers = new int[3] { 784, 100, 10 };
             DigitNN.init(out digitNw, layers);
+            pictureBoxAI.Image = Properties.Resources.ai;
+            digit = true;
         }
 
         /// <summary>
@@ -580,101 +603,50 @@ namespace NeuralNetwork
         {
             if (data != null && labels != null && digitNw != null)
             {
-                float[][] trainData = DigitNN.transformBitmapdata(data);
-                int epochs = 10000;
-                int batchSize = 10;
-                if (labels.Length == 60000)
-                {
-                    epochs = 30;
-                    batchSize = 10000;
-                }
-                Train<byte>.trainNetwork(digitNw, trainData, labels, epochs, batchSize);
+                Thread t = new Thread(trainDigitThread);
+                pictureBoxAI.Image = Properties.Resources.loading;
+                t.Start();
             }
             else
             {
                 // handle if data not yet loaded or neural network not yet initalized
             }
-
         }
 
-        private void test()
+        private void trainDigitThread()
         {
-            int[] layers = new int[3] { 4, 3, 4 };
-            DigitNN.init(out digitNw, layers);
-            float[][][] weights;
-            float w = 0.1f;
-            weights = new float[layers.Length - 1][][];
-            for (int i = 1; i < weights.Length + 1; i++)
+            float[][] transformedData = DigitNN.transformBitmapdata(data);
+            int epochs = 30;
+            int batchSize = 10;
+            float[][] trainData = null;
+            float[][] validset = null;
+            byte[] trainLabels = null;
+            byte[] validsetLabels = null;
+            if (labels.Length == 10000)
             {
-                //position of the neuron (16)
-                weights[i - 1] = new float[layers[i]][];
-                for (int j = 0; j < weights[i - 1].Length; j++)
-                {
-                    //position of the weight (784)
-                    weights[i - 1][j] = new float[layers[i - 1]];
-                    for (int k = 0; k < weights[i-1][j].Length; k++)
-                    {
-                        weights[i - 1][j][k] = w;
-                        w += 0.05f;
-                    }
-                }
-            }
-            float b = 1.0f;
-            float[][] biases = new float[layers.Length - 1][];
-            for (int i = 0; i < biases.Length; i++)
-            {
-                biases[i] = new float[layers[i + 1]];
-                for (int j = 0; j < biases[i].Length; j++)
-                {
-                    biases[i][j] = b;
-                    b -= 0.05f;
-                }
-            }
+                DigitNN.splitIntoTrainAndValidset(transformedData, out trainData, out validset, labels.Length - labels.Length / 10);
+                DigitNN.splitIntoTrainAndValidsetLabels(labels, out trainLabels, out validsetLabels, labels.Length - labels.Length / 10);
 
-            digitNw.testWB(ref weights, ref biases);
-
-            float[][] trainData = new float[1000][];
-            float data = 0.0f;
-            for (int i = 0; i < trainData.Length; i++)
-            {
-                if (i == 250)
-                {
-                    data = 0.2f;
-                }
-                if (i == 500)
-                {
-                    data = 0.3f;
-                }
-                if (i == 750)
-                {
-                    data = 0.4f;
-                }
-                trainData[i] = new float[4];
-                trainData[i][0] = data;
-                trainData[i][1] = 0.1f;
-                trainData[i][2] = 0.1f;
-                trainData[i][3] = data;
             }
-            byte[] labels = new byte[trainData.Length];
-            byte clabel = 0;
-            for (int i = 0; i < trainData.Length; i++)
+            if (labels.Length == 60000)
             {
-                if (i == 250)
-                {
-                    clabel = 1;
-                }
-                if (i == 500)
-                {
-                    clabel = 2;
-                }
-                if ( i == 750 )
-                {
-                    clabel = 3;
-                }
-                labels[i] = clabel;
+                DigitNN.splitIntoTrainAndValidset(transformedData, out trainData, out validset, labels.Length - labels.Length / 6);
+                DigitNN.splitIntoTrainAndValidsetLabels(labels, out trainLabels, out validsetLabels, labels.Length - labels.Length / 6);
             }
+            Train<byte>.trainNetwork(digitNw, trainData, validset, labels, validsetLabels, epochs, batchSize, aiTextBox);
+            pictureBoxAI.Image = Properties.Resources.ai;
+        }
+    }
 
-            Train<byte>.trainNetwork(digitNw, trainData, labels, 10000, 100);
+    public static class Extensions
+    {
+        public static void Invoke<TControlType>(this TControlType control, Action<TControlType> del)
+            where TControlType : Control
+        {
+            if (control.InvokeRequired)
+                control.Invoke(new Action(() => del(control)));
+            else
+                del(control);
         }
     }
 }

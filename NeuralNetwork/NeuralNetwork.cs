@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork
 {
+    /// <summary>
+    /// Back propagation structure
+    /// </summary>
     struct BackPropStruct
     {
         public float[][][] deltW;
@@ -125,20 +128,6 @@ namespace NeuralNetwork
                     }
                 }
             }
-
-            //Test for above triple for loop
-            /*for (int i = 0; i < weights.Length - 1; i++)
-            {
-                Debug.WriteLine("-----------------");
-                for (int j = 0; j < weights[i].Length - 1; j++)
-                {
-                    Debug.WriteLine("-----------------");
-                    for (int k = 0; k < weights[i][j].Length - 1; k++)
-                    {
-                        Debug.Write(weights[i][j][k] + " ");
-                    }
-                }
-            }*/
         }
 
         /// <summary>
@@ -157,21 +146,7 @@ namespace NeuralNetwork
                 }
             }
         }
-
-        /*private float randVariables()
-        {
-            float mean = 100;
-            float stdDev = 10;
-            Random rand = new Random(); //reuse this if you are generating many
-            float u1 = (float)(1.0 - rand.NextDouble()); //uniform(0,1] random doubles
-            float u2 = (float)(1.0 - rand.NextDouble());
-            float randStdNormal = (float)(Math.Sqrt(-2.0 * Math.Log(u1)) * 
-                Math.Sin(2.0 * Math.PI * u2)); //random normal(0,1)
-            float randNormal = mean + stdDev * randStdNormal; //random normal(mean,stdDev^2)
-
-            return randNormal;
-        }*/
-
+        
         /// <summary>
         /// Sigmoid function to make the value of "a" to be somewhere 0 to 1 
         /// </summary>
@@ -397,7 +372,7 @@ namespace NeuralNetwork
                 }
                 for (int j = 0; j < weights[hL].Length; j++)
                 {
-                    backPropstruct.deltB[hL - 1][i] += /*weights[hL][j][i] * */derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
+                    backPropstruct.deltB[hL - 1][i] += derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
                 }
             }
         }
@@ -434,35 +409,6 @@ namespace NeuralNetwork
                 dCda[i] = new float[weights[i].Length];
             }
         }
-
-        //private void addGradVectToWeight()
-        //{
-        //    int index = 0;
-
-        //    for (int i = layers.Length - 1; i > 0; i--)
-        //    {
-        //        for (int j = 0; j < neurons[i].Length; j++)
-        //        {
-        //            for (int k = 0; k < weights[i][j].Length; k++)
-        //            {
-        //                weights[i][j][k] += -n * gradientVector.weights[index++];
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private void addGradVectToBias()
-        //{
-        //    int index = 0;
-
-        //    for (int i = layers.Length - 1; i > 0; i--)
-        //    {
-        //        for (int j = 0; j < neurons[i].Length; j++)
-        //        {
-        //            biases[i][j] += -n * gradientVector.biases[index++];
-        //        }
-        //    }
-        //}
 
         /// <summary>
         /// Given an input, determine the output

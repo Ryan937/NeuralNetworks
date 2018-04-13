@@ -9,8 +9,16 @@ namespace NeuralNetwork
 {
     class DigitNN
     {
+        /// <summary>
+        /// Side length of input image
+        /// </summary>
         public const int IMAGE_SIDE = 28;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="nw">Digit neural network</param>
+        /// <param name="layers">All specification of layer structure</param>
         public static void init(out NeuralNetwork<byte> nw, int[] layers)
         {
             byte[] meaning = new byte[layers[layers.Length - 1]];
@@ -58,10 +66,60 @@ namespace NeuralNetwork
                 for (int w = 0; w < IMAGE_SIDE; w++)
                 {
                     Color c = data.GetPixel(w, h);
-                    result[index++] = (c.R + c.G + c.B) / 3.0f / 255.0f;
+                    result[index++] = (c.G + c.B) / 2.0f / 255.0f;
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Split data into training data and validset data
+        /// </summary>
+        /// <param name="data">input data</param>
+        /// <param name="trainData">training data</param>
+        /// <param name="validset">validset data</param>
+        /// <param name="trainDataSize">train data size</param>
+        public static void splitIntoTrainAndValidset(float[][] data, out float[][] trainData, out float[][] validset, int trainDataSize)
+        {
+            trainData = new float[trainDataSize][];
+            validset = new float[data.Length - trainDataSize][];
+            for (int i = 0; i < trainDataSize; i++)
+            {
+                trainData[i] = new float[data[i].Length];
+                for (int j = 0; j < trainData[i].Length; j++)
+                {
+                    trainData[i][j] = data[i][j];
+                }
+            }
+            for (int i = 0; i < validset.Length; i++)
+            {
+                validset[i] = new float[data[i].Length];
+                for (int j = 0; j < validset[i].Length; j++)
+                {
+                    validset[i][j] = data[i + trainDataSize][j];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Split label into training label and validset labels
+        /// </summary>
+        /// <param name="labels">input labels</param>
+        /// <param name="trainLabels">training labels</param>
+        /// <param name="validsetLabels">validset labels</param>
+        /// <param name="trainDataSize">train data size</param>
+        public static void splitIntoTrainAndValidsetLabels(byte[] labels, out byte[] trainLabels, out byte[] validsetLabels, int trainDataSize)
+        {
+            trainLabels = new byte[trainDataSize];
+            validsetLabels = new byte[labels.Length - trainDataSize];
+            for (int i = 0; i < trainDataSize; i++)
+            {
+                trainLabels[i] = labels[i];
+            }
+            for (int i = 0; i < validsetLabels.Length; i++)
+            {
+                validsetLabels[i] = labels[i + trainDataSize];
+            }
         }
     }
 }

@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace NeuralNetwork
 {
     class MnistLoader
     {
-        public static void LoadMnist(string path, string secondPath, out Bitmap[] bitmap, out byte[] labels)
+        public static void LoadMnist(string path, string secondPath, out Bitmap[] bitmap, out byte[] labels, PictureBox pictureBoxAI)
         {
             bitmap = null;
             labels = null;
@@ -67,6 +68,17 @@ namespace NeuralNetwork
                 Console.WriteLine(ex.Message);
                 Console.ReadLine();
             }
+            pictureBoxAI.Invoke(new Action(() =>
+            {
+                if (Form1.digit)
+                {
+                    pictureBoxAI.Image = Properties.Resources.ai;
+                }
+                else
+                {
+                    pictureBoxAI.Image = null;
+                }
+            }));
         }
     }
 }
