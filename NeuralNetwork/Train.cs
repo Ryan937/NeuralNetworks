@@ -42,14 +42,10 @@ namespace NeuralNetwork
                     nn.calcOutput();
                     nn.calculateCost(dataS.labels[batchIndex]);
                     nn.calcGradientVector();
-                    nn.resetCost();
+                    //nn.resetCost();
                 }
                 nn.BackPropApplication();
                 trainResult(nn, dataS.data, dataS.labels, e, batchSize);
-                if (e == 9998)
-                {
-                    int wait = 0;
-                }
 //                nn.resetCost();
             }
         }

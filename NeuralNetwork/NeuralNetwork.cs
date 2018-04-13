@@ -37,7 +37,7 @@ namespace NeuralNetwork
         //private bool gradVectExist = false;
         BackPropStruct backPropstruct;
         private T[] interpretation;
-        private float n = 1.0f;
+        private float n = 3.0f;
         private T label;
         private int expectedIndex = -1;
         /// <summary>
@@ -355,7 +355,7 @@ namespace NeuralNetwork
                 {
                     y = 1;
                 }
-                dCda[L - 1][i] = 2.0f * (neurons[L][i] - y);
+                dCda[L - 1][i] = (neurons[L][i] - y);
                 // for every weights of the last layer
                 for (int w = 0; w < weights[L - 1][i].Length; w++)
                 {
@@ -388,6 +388,7 @@ namespace NeuralNetwork
 
                     dCda[hL - 1][i] += weights[hL][curdCda][i] * derivativeSigmoid(Logit(neurons[hL + 1][curdCda])) * dCda[hL][curdCda];
                 }
+                //dCda[hL - 1][i] /= dCda[hL].Length;
                 // we have previous layer's dCda[hL]
                 // for every weight to be adjusted
                 for (int w = 0; w < weights[hL - 1][i].Length; w++)
@@ -396,7 +397,7 @@ namespace NeuralNetwork
                 }
                 for (int j = 0; j < weights[hL].Length; j++)
                 {
-                    backPropstruct.deltB[hL - 1][i] += weights[hL][j][i] * derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
+                    backPropstruct.deltB[hL - 1][i] += /*weights[hL][j][i] * */derivativeSigmoid(Logit(neurons[hL][i])) * dCda[hL - 1][i];
                 }
             }
         }

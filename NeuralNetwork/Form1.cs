@@ -79,7 +79,7 @@ namespace NeuralNetwork
             InitializeDrawing();
             CustomizeMenuStrip(menuStrip1);
             // testing
-            test();
+            //test();
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
         
@@ -156,6 +156,8 @@ namespace NeuralNetwork
             aiTextBox.Enabled = false;
             aiTextBox.TabStop = false;
             aiTextBox.Multiline = true;
+            aiTextBox.ScrollBars = ScrollBars.Vertical;
+            aiTextBox.WordWrap = true;
             aiTextBox.Text = "Hello there!";
             aiPanel.Controls.Add(aiTextBox);
             //
@@ -554,7 +556,7 @@ namespace NeuralNetwork
             {
                 float[] input = DigitNN.transformBitmapdata(B);
                 byte result = digitNw.determine(input);
-                aiTextBox.Text += "\r\nI think it is a " + result + " :) f u im right";
+                aiTextBox.Text += "\r\nI think it is a " + result + " :)";
             }
         }
 
@@ -579,8 +581,8 @@ namespace NeuralNetwork
             if (data != null && labels != null && digitNw != null)
             {
                 float[][] trainData = DigitNN.transformBitmapdata(data);
-                int epochs = 10;
-                int batchSize = 1000;
+                int epochs = 10000;
+                int batchSize = 10;
                 if (labels.Length == 60000)
                 {
                     epochs = 30;
@@ -597,7 +599,7 @@ namespace NeuralNetwork
 
         private void test()
         {
-            int[] layers = new int[3] { 4, 3, 3 };
+            int[] layers = new int[3] { 4, 3, 4 };
             DigitNN.init(out digitNw, layers);
             float[][][] weights;
             float w = 0.1f;
@@ -631,35 +633,43 @@ namespace NeuralNetwork
 
             digitNw.testWB(ref weights, ref biases);
 
-            float[][] trainData = new float[100][];
-            float data = 0.1f;
+            float[][] trainData = new float[1000][];
+            float data = 0.0f;
             for (int i = 0; i < trainData.Length; i++)
             {
-                if (i == 50)
+                if (i == 250)
                 {
                     data = 0.2f;
                 }
-                if (i == 75)
+                if (i == 500)
                 {
                     data = 0.3f;
                 }
+                if (i == 750)
+                {
+                    data = 0.4f;
+                }
                 trainData[i] = new float[4];
                 trainData[i][0] = data;
-                trainData[i][1] = data;
-                trainData[i][2] = data;
+                trainData[i][1] = 0.1f;
+                trainData[i][2] = 0.1f;
                 trainData[i][3] = data;
             }
             byte[] labels = new byte[trainData.Length];
             byte clabel = 0;
             for (int i = 0; i < trainData.Length; i++)
             {
-                if (i == 50)
+                if (i == 250)
                 {
                     clabel = 1;
                 }
-                if ( i == 75 )
+                if (i == 500)
                 {
                     clabel = 2;
+                }
+                if ( i == 750 )
+                {
+                    clabel = 3;
                 }
                 labels[i] = clabel;
             }
