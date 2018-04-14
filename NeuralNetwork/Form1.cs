@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -635,6 +636,77 @@ namespace NeuralNetwork
             }
             Train<byte>.trainNetwork(digitNw, trainData, validset, labels, validsetLabels, epochs, batchSize, aiTextBox);
             pictureBoxAI.Image = Properties.Resources.ai;
+        }
+
+        public void savingWeights(float[][][] weight, int length)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.FileName = "DefaultOutputName.txt";
+            save.Filter = "Text File | *.txt";
+            DialogResult dialogResult = saveFileDialog.ShowDialog();
+
+            int offset = 12;
+            byte[] weightByte = new byte[length * 4 + offset];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(weight.Length), 0, weightByte, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(weight[0].Length), 0, weightByte, 4, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(weight[0][0].Length), 0, weightByte, 8, 4);
+
+            float[][][] wait = new float[weightByte[0]][][];
+
+            if (dialogResult == DialogResult.OK)
+            {
+                Stream f = saveFileDialog.OpenFile();
+                if (f != null)
+                {
+                    BinaryWriter wr = new BinaryWriter(f);
+
+                    for (int i = 0; i < weight.Length; i++)
+                    {
+                        for (int j = 0; j < weight[i].Length; j++)
+                        {
+                            Buffer.BlockCopy(weight[i][j], 0, weightByte, offset, weight[i][j].Length * 4);
+                            offset += weight[i][j].Length * 4;
+                        }
+                    }
+                    wr.Write(weightByte);
+
+                    wr.Close();
+                    f.Close();
+                }
+            }
+        }
+
+        private void loadWeightsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            float[][][] loadedWeights;
+            int offset = 3;
+
+            string file = "NULL";
+            DialogResult result = openFileDialog.ShowDialog();
+            if (result == DialogResult.OK) // Test result.
+            {
+                file = openFileDialog.FileName;
+
+                byte[] fileByte = File.ReadAllBytes(file);
+
+                int layerLength = BitConverter.ToInt32(fileByte, 0);
+                int neuronLength = BitConverter.ToInt32(fileByte, 4);
+                int weightLength = BitConverter.ToInt32(fileByte, 8);
+
+                loadedWeights = new float[layerLength][][];
+                offset = 12;
+                for (int i = 0; i < layerLength; i++)
+                {
+                    loadedWeights[i] = new float[neuronLength][];
+                    for (int j = 0; j < neuronLength; j++)
+                    {
+                        loadedWeights[i][j] = new float[weightLength];
+                        Buffer.BlockCopy(fileByte, offset, loadedWeights[i][j], 0, loadedWeights[i][j].Length * 4);
+                        offset += loadedWeights[i][j].Length * 4;
+                    }
+                }
+            }
         }
     }
 
