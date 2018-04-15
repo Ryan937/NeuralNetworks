@@ -68,6 +68,10 @@ namespace NeuralNetwork
         /// </summary>
         private NeuralNetwork<byte> digitNw;
         public static bool digit;
+        /// <summary>
+        /// Constants
+        /// </summary>
+        private const int INT_SIZE = 4;
 
         public Form1()
         {
@@ -638,21 +642,39 @@ namespace NeuralNetwork
             pictureBoxAI.Image = Properties.Resources.ai;
         }
 
-        public void savingWeights(float[][][] weight, int length)
+        private void savingWeights(NeuralNetwork<byte> nn)
         {
             SaveFileDialog save = new SaveFileDialog();
             save.FileName = "DefaultOutputName.txt";
             save.Filter = "Text File | *.txt";
             DialogResult dialogResult = saveFileDialog.ShowDialog();
 
-            int offset = 12;
-            byte[] weightByte = new byte[length * 4 + offset];
+            int layerLength = nn.Layers.Length;
+            int wLength = 0;
+            int bLength = 0;
+            int arrayOffset = 0;
+            byte[] savedArray;
 
-            Buffer.BlockCopy(BitConverter.GetBytes(weight.Length), 0, weightByte, 0, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(weight[0].Length), 0, weightByte, 4, 4);
-            Buffer.BlockCopy(BitConverter.GetBytes(weight[0][0].Length), 0, weightByte, 8, 4);
+            for (int l = 0; l < layerLength - 1; l++)
+            {
+                wLength += nn.Layers[l] * nn.Layers[l + 1];
+            }
 
-            float[][][] wait = new float[weightByte[0]][][];
+            for (int l = 1; l < layerLength; l++)
+            {
+                bLength += nn.Layers[l];
+            }
+
+            savedArray = new byte[wLength * INT_SIZE + layerLength * INT_SIZE + bLength * INT_SIZE + INT_SIZE];
+
+            Buffer.BlockCopy(BitConverter.GetBytes(layerLength), 0, savedArray, arrayOffset, INT_SIZE);
+            arrayOffset += INT_SIZE;
+
+            for (int i = 0; i < layerLength; i++)
+            {
+                Buffer.BlockCopy(BitConverter.GetBytes(nn.Layers[i]), 0, savedArray, arrayOffset, INT_SIZE);
+                arrayOffset += INT_SIZE;
+            }
 
             if (dialogResult == DialogResult.OK)
             {
@@ -661,26 +683,34 @@ namespace NeuralNetwork
                 {
                     BinaryWriter wr = new BinaryWriter(f);
 
-                    for (int i = 0; i < weight.Length; i++)
+                    for (int i = 0; i < nn.Weights.Length; i++)
                     {
-                        for (int j = 0; j < weight[i].Length; j++)
+                        for (int j = 0; j < nn.Weights[i].Length; j++)
                         {
-                            Buffer.BlockCopy(weight[i][j], 0, weightByte, offset, weight[i][j].Length * 4);
-                            offset += weight[i][j].Length * 4;
+                            Buffer.BlockCopy(nn.Weights[i][j], 0, savedArray, arrayOffset, nn.Weights[i][j].Length * 4);
+                            arrayOffset += nn.Weights[i][j].Length * 4;
                         }
                     }
-                    wr.Write(weightByte);
 
+                    for (int i = 0; i < nn.Biases.Length; i++)
+                    {
+                        Buffer.BlockCopy(nn.Biases[i], 0, savedArray, arrayOffset, nn.Biases[i].Length * 4);
+                        arrayOffset += nn.Biases[i].Length * 4;
+                    }
+                    wr.Write(savedArray);
                     wr.Close();
                     f.Close();
                 }
             }
         }
 
-        private void loadWeightsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void loadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             float[][][] loadedWeights;
-            int offset = 3;
+            float[][] loadedBiases;
+            int[] header;
+            int layerLength = 0;
+            int wbOffset = 0;
 
             string file = "NULL";
             DialogResult result = openFileDialog.ShowDialog();
@@ -690,22 +720,48 @@ namespace NeuralNetwork
 
                 byte[] fileByte = File.ReadAllBytes(file);
 
-                int layerLength = BitConverter.ToInt32(fileByte, 0);
-                int neuronLength = BitConverter.ToInt32(fileByte, 4);
-                int weightLength = BitConverter.ToInt32(fileByte, 8);
+                layerLength = fileByte[0];
+                header = new int[layerLength];
+                wbOffset += INT_SIZE;
 
-                loadedWeights = new float[layerLength][][];
-                offset = 12;
                 for (int i = 0; i < layerLength; i++)
                 {
-                    loadedWeights[i] = new float[neuronLength][];
-                    for (int j = 0; j < neuronLength; j++)
+                    header[i] = BitConverter.ToInt32(fileByte, INT_SIZE * i + INT_SIZE);
+                    wbOffset += INT_SIZE;
+                }
+                //header length: 4, 784     100     100    10
+                loadedWeights = new float[layerLength - 1][][];
+                for (int i = 0; i < layerLength - 1; i++)
+                {
+                    loadedWeights[i] = new float[header[i + 1]][];
+                    for (int j = 0; j < header[i + 1]; j++)
                     {
-                        loadedWeights[i][j] = new float[weightLength];
-                        Buffer.BlockCopy(fileByte, offset, loadedWeights[i][j], 0, loadedWeights[i][j].Length * 4);
-                        offset += loadedWeights[i][j].Length * 4;
+                        loadedWeights[i][j] = new float[header[i]];
+                        Buffer.BlockCopy(fileByte, wbOffset, loadedWeights[i][j], 0, loadedWeights[i][j].Length * INT_SIZE);
+                        wbOffset += loadedWeights[i][j].Length * INT_SIZE;
                     }
                 }
+
+                loadedBiases = new float[layerLength - 1][];
+                for (int i = 0; i < layerLength - 1; i++)
+                {
+                    loadedBiases[i] = new float[header[i + 1]];
+                    Buffer.BlockCopy(fileByte, wbOffset, loadedBiases[i], 0, loadedBiases[i].Length * INT_SIZE);
+                    wbOffset += loadedBiases[i].Length * INT_SIZE;
+                }
+                digitNw = new NeuralNetwork<byte>(header);
+                digitNw.testWB(ref loadedWeights, ref loadedBiases);
+                DigitNN.init(out digitNw, header);
+                pictureBoxAI.Image = Properties.Resources.ai;
+                digit = true;
+            }
+        }
+
+        private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (digitNw != null)
+            {
+                savingWeights(digitNw);
             }
         }
     }
