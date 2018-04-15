@@ -519,6 +519,7 @@ namespace NeuralNetwork
             loadToolStripMenuItem.ForeColor = themeColor;
             trainToolStripMenuItem.ForeColor = themeColor;
             digitToolStripMenuItem.ForeColor = themeColor;
+            saveToolStripMenuItem1.ForeColor = themeColor;
         }
 
         /// <summary>
@@ -572,7 +573,7 @@ namespace NeuralNetwork
                 if (aiTextBox.Lines.Length == 6)
                 {
                     Form1.CustomTextBox temp = new Form1.CustomTextBox();
-                    for (int i = 1; i < aiTextBox.Lines.Length - 1; i++)
+                    for (int i = 1; i < aiTextBox.Lines.Length; i++)
                     {
                         temp.Text += aiTextBox.Lines[i] + "\n";
                     }
@@ -621,7 +622,7 @@ namespace NeuralNetwork
         private void trainDigitThread()
         {
             float[][] transformedData = DigitNN.transformBitmapdata(data);
-            int epochs = 30;
+            int epochs = 1;
             int batchSize = 10;
             float[][] trainData = null;
             float[][] validset = null;
@@ -750,8 +751,8 @@ namespace NeuralNetwork
                     wbOffset += loadedBiases[i].Length * INT_SIZE;
                 }
                 digitNw = new NeuralNetwork<byte>(header);
-                digitNw.testWB(ref loadedWeights, ref loadedBiases);
                 DigitNN.init(out digitNw, header);
+                digitNw.testWB(ref loadedWeights, ref loadedBiases);
                 pictureBoxAI.Image = Properties.Resources.ai;
                 digit = true;
             }

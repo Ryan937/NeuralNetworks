@@ -435,9 +435,9 @@ namespace NeuralNetwork
             T result = default(T);
             getInputs(inputs);
             calcOutput();
+            float curMax = 0;
             for (int i = 0; i < neurons[Layers.Length - 1].Length; i++)
             {
-                float curMax = 0;
                 if (neurons[Layers.Length - 1][i] >= threshold &&
                     neurons[Layers.Length - 1][i] > curMax)
                 {

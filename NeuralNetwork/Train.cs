@@ -79,7 +79,7 @@ namespace NeuralNetwork
             if (aiTextBox.Lines.Length == 6)
             {
                 Form1.CustomTextBox temp = new Form1.CustomTextBox();
-                for (int i = 1; i < aiTextBox.Lines.Length - 1; i++)
+                for (int i = 1; i < aiTextBox.Lines.Length; i++)
                 {
                     temp.Text += aiTextBox.Lines[i] + "\n";
                 }
