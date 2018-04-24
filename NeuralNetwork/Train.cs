@@ -10,10 +10,10 @@ namespace NeuralNetwork
     {
         public struct DataStruct
         {
-            public float[][] data;
+            public double[][] data;
             public T[] labels;
 
-            public DataStruct(float[][] data, T[] labels)
+            public DataStruct(double[][] data, T[] labels)
             {
                 this.data = data;
                 this.labels = labels;
@@ -31,7 +31,7 @@ namespace NeuralNetwork
         /// <param name="epochs">number of epochs</param>
         /// <param name="batchSize">Batch size</param>
         public static void trainNetwork(NeuralNetwork<T> nn, 
-            float[][] data, float[][] validset, T[] labels, T[] validsetLabels, int epochs, int batchSize, Form1.CustomTextBox aiTextBox)
+            double[][] data, double[][] validset, T[] labels, T[] validsetLabels, int epochs, int batchSize, NeuralNetwork.CustomTextBox aiTextBox)
         {
             for (int e = 0; e < epochs; e++)
             {
@@ -64,7 +64,7 @@ namespace NeuralNetwork
         /// <param name="curEpoch">current epoch</param>
         /// <param name="index">current data index</param>
         public static void trainResult(NeuralNetwork<T> nn,
-            float[][] data, T[] labels, int curEpoch, int batchSize, Form1.CustomTextBox aiTextBox)
+            double[][] data, T[] labels, int curEpoch, int batchSize, NeuralNetwork.CustomTextBox aiTextBox)
         {
             int success = 0;
             for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
@@ -78,8 +78,8 @@ namespace NeuralNetwork
             Console.WriteLine("Epoch " + curEpoch + ": " + success + " / " + batchSize);
             if (aiTextBox.Lines.Length == 6)
             {
-                Form1.CustomTextBox temp = new Form1.CustomTextBox();
-                for (int i = 1; i < aiTextBox.Lines.Length - 1; i++)
+                NeuralNetwork.CustomTextBox temp = new NeuralNetwork.CustomTextBox();
+                for (int i = 1; i < aiTextBox.Lines.Length; i++)
                 {
                     temp.Text += aiTextBox.Lines[i] + "\n";
                 }

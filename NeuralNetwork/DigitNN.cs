@@ -30,16 +30,16 @@ namespace NeuralNetwork
         }
 
         /// <summary>
-        /// Transform bitmap data into float array
+        /// Transform bitmap data into double array
         /// </summary>
         /// <param name="data">Input bitmap</param>
         /// <returns>Float format result</returns>
-        public static float[][] transformBitmapdata(Bitmap[] data)
+        public static double[][] transformBitmapdata(Bitmap[] data)
         {
-            float[][] result = new float[data.Length][];
+            double[][] result = new double[data.Length][];
             for (int i = 0; i < data.Length; i++)
             {
-                result[i] = new float[IMAGE_SIDE * IMAGE_SIDE];
+                result[i] = new double[IMAGE_SIDE * IMAGE_SIDE];
                 // data bitmap size check handling isn't implemented
                 for (int h = 0, index = 0; h < IMAGE_SIDE; h++)
                 {
@@ -54,13 +54,13 @@ namespace NeuralNetwork
         }
 
         /// <summary>
-        /// Transform bitmap data into float array
+        /// Transform bitmap data into double array
         /// </summary>
         /// <param name="data">Input bitmap</param>
         /// <returns>Float format result</returns>
-        public static float[] transformBitmapdata(Bitmap data)
+        public static double[] transformBitmapdata(Bitmap data)
         {
-            float[] result = new float[IMAGE_SIDE * IMAGE_SIDE];
+            double[] result = new double[IMAGE_SIDE * IMAGE_SIDE];
             for (int h = 0, index = 0; h < IMAGE_SIDE; h++)
             {
                 for (int w = 0; w < IMAGE_SIDE; w++)
@@ -79,13 +79,13 @@ namespace NeuralNetwork
         /// <param name="trainData">training data</param>
         /// <param name="validset">validset data</param>
         /// <param name="trainDataSize">train data size</param>
-        public static void splitIntoTrainAndValidset(float[][] data, out float[][] trainData, out float[][] validset, int trainDataSize)
+        public static void splitIntoTrainAndValidset(double[][] data, out double[][] trainData, out double[][] validset, int trainDataSize)
         {
-            trainData = new float[trainDataSize][];
-            validset = new float[data.Length - trainDataSize][];
+            trainData = new double[trainDataSize][];
+            validset = new double[data.Length - trainDataSize][];
             for (int i = 0; i < trainDataSize; i++)
             {
-                trainData[i] = new float[data[i].Length];
+                trainData[i] = new double[data[i].Length];
                 for (int j = 0; j < trainData[i].Length; j++)
                 {
                     trainData[i][j] = data[i][j];
@@ -93,7 +93,7 @@ namespace NeuralNetwork
             }
             for (int i = 0; i < validset.Length; i++)
             {
-                validset[i] = new float[data[i].Length];
+                validset[i] = new double[data[i].Length];
                 for (int j = 0; j < validset[i].Length; j++)
                 {
                     validset[i][j] = data[i + trainDataSize][j];
