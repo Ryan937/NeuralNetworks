@@ -23,4 +23,10 @@ How to use the digit AI
 1. Create a digit AI and/or train the AI, or load existing AI
 2. Draw on left picturebox panel using mouse click + drag
 3. Press the "?" button on the bottom right below the AI panel
+<<<<<<< HEAD
 4. The AI will print the determined output
+=======
+4. The AI will print the determined output
+
+Similar methods for Letter AI
+>>>>>>> 77681e2b932227fe8aa2264fb4632ac10daac3a3
