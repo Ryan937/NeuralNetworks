@@ -13,46 +13,46 @@ namespace NeuralNetwork
     /// </summary>
     struct BackPropStruct
     {
-        public float[][][] deltW;
-        public float[][] deltB;
+        public double[][][] deltW;
+        public double[][] deltB;
         public int batchSize;
 
-        public BackPropStruct(float[][][] deltW, float[][] deltB, int batchSize)
+        public BackPropStruct(double[][][] deltW, double[][] deltB, int batchSize)
         {
             this.deltW = deltW;
             this.deltB = deltB;
             this.batchSize = batchSize;
         }
     };
-    
+
     class NeuralNetwork<T>
     {
         private int[] layers;
         /// <summary>
         /// Layers of neurons of the neural network
         /// </summary>
-        private float[][] neurons;
-        private float[][][] weights;
-        private float[][] biases;
-        private float[][] dCda;
-        private float[] cost;
+        private double[][] neurons;
+        private double[][][] weights;
+        private double[][] biases;
+        private double[][] dCda;
+        private double[] cost;
         private bool costExist = false;
         //private bool gradVectExist = false;
         BackPropStruct backPropstruct;
         private T[] interpretation;
-        private float n = 3.0f;
+        private double n = 3.0f;
         private T label;
         private int expectedIndex = -1;
         /// <summary>
         /// A threshold for determining output validity
         /// </summary>
-        private const float threshold = 0.5f;
+        private const double threshold = 0.5f;
 
         private Random random;
 
         public int[] Layers { get => layers; set => layers = value; }
-        public float[][][] Weights { get => weights; set => weights = value; }
-        public float[][] Biases { get => biases; set => biases = value; }
+        public double[][][] Weights { get => weights; set => weights = value; }
+        public double[][] Biases { get => biases; set => biases = value; }
 
         /// <summary>
         /// Constructor for Neural Network
@@ -103,21 +103,21 @@ namespace NeuralNetwork
         /// </summary>
         private void InitNeurons()
         {
-            neurons = new float[Layers.Length][];
+            neurons = new double[Layers.Length][];
             for (int i = 0; i < Layers.Length; i++)
             {
-                neurons[i] = new float[Layers[i]];
+                neurons[i] = new double[Layers[i]];
                 for (int j = 0; j < Layers[i]; j++)
                 {
                     neurons[i][j] = 0.0f;
                 }
             }
-            cost = new float[Layers[Layers.Length - 1]];
+            cost = new double[Layers[Layers.Length - 1]];
         }
 
         public void resetCost()
         {
-            cost = new float[Layers[Layers.Length - 1]];
+            cost = new double[Layers[Layers.Length - 1]];
             costExist = false;
         }
 
@@ -127,18 +127,18 @@ namespace NeuralNetwork
         private void InitWeights()
         {
             //position of layers (4)
-            Weights = new float[Layers.Length - 1][][];
+            Weights = new double[Layers.Length - 1][][];
             for (int i = 1; i < Weights.Length + 1; i++)
             {
                 //position of the neuron (16)
-                Weights[i - 1] = new float[neurons[i].Length][];
+                Weights[i - 1] = new double[neurons[i].Length][];
                 for (int j = 0; j < Weights[i - 1].Length; j++)
                 {
                     //position of the weight (784)
-                    Weights[i - 1][j] = new float[neurons[i - 1].Length];
+                    Weights[i - 1][j] = new double[neurons[i - 1].Length];
                     for (int k = 0; k < neurons[i - 1].Length; k++)
                     {
-                        float randNum = (float)random.NextDouble() - 0.5f;
+                        double randNum = (double)random.NextDouble() - 0.5f;
                         Weights[i - 1][j][k] = randNum;
                     }
                 }
@@ -150,26 +150,26 @@ namespace NeuralNetwork
         /// </summary>
         private void InitBiases()
         {
-            Biases = new float[Layers.Length - 1][];
+            Biases = new double[Layers.Length - 1][];
             for (int i = 0; i < Biases.Length; i++)
             {
-                Biases[i] = new float[neurons[i + 1].Length];
+                Biases[i] = new double[neurons[i + 1].Length];
                 for (int j = 0; j < Biases[i].Length; j++)
                 {
-                    float randNum = (float)random.NextDouble();
+                    double randNum = (double)random.NextDouble();
                     Biases[i][j] = randNum;
                 }
             }
         }
-        
+
         /// <summary>
         /// Sigmoid function to make the value of "a" to be somewhere 0 to 1 
         /// </summary>
         /// <param name="x">The "a"</param>
         /// <returns>Sigmoid of "a"</returns>
-        private float Sigmoid(float x)
+        private double Sigmoid(double x)
         {
-            return (float)(1 / (1 + Math.Exp(-x)));
+            return (double)(1 / (1 + Math.Exp(-x)));
         }
 
         /// <summary>
@@ -177,16 +177,16 @@ namespace NeuralNetwork
         /// </summary>
         /// <param name="x">The "a"</param>
         /// <returns>Derivative of the sigmoid "a"</returns>
-        private float derivativeSigmoid(float x)
+        private double derivativeSigmoid(double x)
         {
-            return (float)(Math.Exp(-x) / Math.Pow((1 + Math.Exp(-x)), 2));
+            return (double)(Math.Exp(-x) / Math.Pow((1 + Math.Exp(-x)), 2));
         }
 
         /// <summary>
         /// Each neurons take a part of the image and stores "a" into neurons array
         /// </summary>
-        /// <param name="inputs">The float array of inputs</param>
-        public void getInputs(float[] inputs, T label)
+        /// <param name="inputs">The double array of inputs</param>
+        public void getInputs(double[] inputs, T label)
         {
             for (int i = 0; i < inputs.Length; i++)
             {
@@ -208,7 +208,7 @@ namespace NeuralNetwork
         /// Get inpu without label attached, for determining uses mostly
         /// </summary>
         /// <param name="inputs">Input array</param>
-        public void getInputs(float[] inputs)
+        public void getInputs(double[] inputs)
         {
             for (int i = 0; i < inputs.Length; i++)
             {
@@ -225,7 +225,7 @@ namespace NeuralNetwork
         /// </summary>
         public void calcOutput()
         {
-            float sum = 0;
+            double sum = 0;
 
             for (int i = 0; i < Layers.Length - 1; i++)
             {
@@ -251,9 +251,9 @@ namespace NeuralNetwork
         /// <param name="value"></param>
         public void calculateCost(T value)
         {
-            float costTemp = 0.0f;
+            double costTemp = 0.0f;
             int lastLayer = Layers.Length - 1;
-            float expectedOutput = 0.0f;
+            double expectedOutput = 0.0f;
             int v = 0;
             for (int i = 0; i < interpretation.Length; i++)
             {
@@ -272,7 +272,7 @@ namespace NeuralNetwork
                     expectedOutput = 1.00f;
                 }
 
-                costTemp += (float)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
+                costTemp += (double)Math.Pow((neurons[lastLayer][i] - expectedOutput), 2);
 
                 if (expectedOutput == 1.00f)
                 {
@@ -292,6 +292,9 @@ namespace NeuralNetwork
             }
         }
 
+        /// <summary>
+        /// Calculate all delta weights and biases of gradient vector
+        /// </summary>
         public void calcGradientVector()
         {
             BackPropOutput();
@@ -301,31 +304,38 @@ namespace NeuralNetwork
             }
         }
 
+        /// <summary>
+        /// Calculate derivative of C with respect to derivative of a
+        /// </summary>
         public void calcdCda()
         {
             int L = Layers.Length - 1;
             // for every neuron, i, in the last layer
             for (int i = 0; i < Layers[L]; i++)
             {
-                dCda[L - 1][i] = 2.0f * (float)Math.Sqrt(cost[i]);
+                dCda[L - 1][i] = 2.0f * (double)Math.Sqrt(cost[i]);
             }
         }
 
+        /// <summary>
+        /// Initialize variables to be ready for backpropagation
+        /// </summary>
+        /// <param name="batchSize"></param>
         public void BackPropInit(int batchSize)
         {
-            float[][][] deltW = new float[Weights.Length][][];
+            double[][][] deltW = new double[Weights.Length][][];
             for (int i = 0; i < deltW.Length; i++)
             {
-                deltW[i] = new float[Weights[i].Length][];
+                deltW[i] = new double[Weights[i].Length][];
                 for (int j = 0; j < deltW[i].Length; j++)
                 {
-                    deltW[i][j] = new float[Weights[i][j].Length];
+                    deltW[i][j] = new double[Weights[i][j].Length];
                 }
             }
-            float[][] deltB = new float[Biases.Length][];
+            double[][] deltB = new double[Biases.Length][];
             for (int i = 0; i < deltB.Length; i++)
             {
-                deltB[i] = new float[Biases[i].Length];
+                deltB[i] = new double[Biases[i].Length];
             }
             backPropstruct = new BackPropStruct(deltW, deltB, batchSize);
         }
@@ -357,9 +367,9 @@ namespace NeuralNetwork
             }
         }
 
-        private float Logit(float z)
+        private double Logit(double z)
         {
-            return (float)Math.Log(z / (1 - z));
+            return (double)Math.Log(z / (1 - z));
         }
 
         /// <summary>
@@ -392,6 +402,9 @@ namespace NeuralNetwork
             }
         }
 
+        /// <summary>
+        /// Apply the backpropagation onto the weights and biases
+        /// </summary>
         public void BackPropApplication()
         {
             for (int i = 0; i < Weights.Length; i++)
@@ -400,7 +413,7 @@ namespace NeuralNetwork
                 {
                     for (int k = 0; k < Weights[i][j].Length; k++)
                     {
-                        Weights[i][j][k] -= n * backPropstruct.deltW[i][j][k] / (float)backPropstruct.batchSize;
+                        Weights[i][j][k] -= n * backPropstruct.deltW[i][j][k] / (double)backPropstruct.batchSize;
                     }
                 }
             }
@@ -408,7 +421,7 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < Biases[i].Length; j++)
                 {
-                    Biases[i][j] -= n * backPropstruct.deltB[i][j] / (float)backPropstruct.batchSize;
+                    Biases[i][j] -= n * backPropstruct.deltB[i][j] / (double)backPropstruct.batchSize;
                 }
             }
         }
@@ -418,10 +431,10 @@ namespace NeuralNetwork
         /// </summary>
         public void InitdCda()
         {
-            dCda = new float[Weights.Length][];
+            dCda = new double[Weights.Length][];
             for (int i = 0; i < dCda.Length; i++)
             {
-                dCda[i] = new float[Weights[i].Length];
+                dCda[i] = new double[Weights[i].Length];
             }
         }
 
@@ -430,12 +443,12 @@ namespace NeuralNetwork
         /// </summary>
         /// <param name="inputs">input data</param>
         /// <returns>Result index</returns>
-        public T determine(float[] inputs)
+        public T determine(double[] inputs)
         {
             T result = default(T);
             getInputs(inputs);
             calcOutput();
-            float curMax = 0;
+            double curMax = 0;
             for (int i = 0; i < neurons[Layers.Length - 1].Length; i++)
             {
                 if (neurons[Layers.Length - 1][i] >= threshold &&
@@ -448,7 +461,7 @@ namespace NeuralNetwork
             return result;
         }
 
-        public void testWB(ref float[][][] weights, ref float[][] biases)
+        public void testWB(ref double[][][] weights, ref double[][] biases)
         {
             this.Weights = weights;
             this.Biases = biases;
